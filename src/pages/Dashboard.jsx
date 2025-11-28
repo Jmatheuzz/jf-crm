@@ -138,8 +138,37 @@ export default function Dashboard() {
                 size="large"
                 sx={{ mt: 3, mb: 2, ml: 2 }}
                 onClick={() => navigate('/gerenciar-processo')}>
+                Gerenciar processos habitacionais
+
+            </Button>
+            <Button variant="contained"
+
+                size="large"
+                sx={{ mt: 3, mb: 2, ml: 2 }}
+                onClick={() => navigate('/gerenciar-atendimento')}>
                 Gerenciar atendimentos
 
+            </Button>
+            <Button variant="contained"
+
+                size="large"
+                sx={{ mt: 3, mb: 2, ml: 2 }}
+                onClick={() => navigate('/esteira-atendimentos')}>
+                Esteira de atendimentos iniciais
+            </Button>
+            <Button variant="contained"
+
+                size="large"
+                sx={{ mt: 3, mb: 2, ml: 2 }}
+                onClick={() => navigate('/esteira-processos')}>
+                Esteira de processos habitacionais
+            </Button>
+            <Button variant="contained"
+
+                size="large"
+                sx={{ mt: 3, mb: 2, ml: 2 }}
+                onClick={() => navigate('/comissoes')}>
+                Comissões
             </Button>
 
             {/* SEÇÃO 1: KPIs (4 Cartões de Destaque) */}

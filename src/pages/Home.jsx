@@ -8,7 +8,7 @@ import Tabs from "@mui/material/Tabs"
 import Tab from "@mui/material/Tab"
 import Container from "@mui/material/Container"
 import Box from "@mui/material/Box"
-import AtendimentoCard from "../components/AtendimentoCard"
+import AtendimentoCard from "../components/atendimento/AtendimentoCard"
 import { VisitCard } from "../components/VisitCard";
 import Button from "@mui/material/Button"
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ export default function Home() {
     const [loading, setLoading] = useState(false)
 
     async function getProcesses() {
-        const { data } = await apiBase.get('/processos')
+        const { data } = await apiBase.get('/atendimentos')
         setProcessos(data)
     }
 
@@ -62,14 +62,14 @@ export default function Home() {
                 </Toolbar>
                 <Divider />
                 <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} variant="fullWidth">
-                    <Tab label="Processos" />
+                    <Tab label="Atendimentos" />
                     <Tab label="Visitas" />
                 </Tabs>
             </AppBar>
 
             {tabValue === 0 && (
                 <Container sx={{ py: 2 }}>
-                    {['CORRETOR'].includes(localStorage.getItem('role')) && (
+                    {['ATENDIMENTO'].includes(localStorage.getItem('role')) && (
                         <Button variant="contained"
                             
                             size="large"
@@ -79,12 +79,22 @@ export default function Home() {
 
                             </Button>
                     )}
+                    {['ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                        <Button
+                                        variant="contained"
+                                        size="large"
+                                        sx={{ mt: 3, mb: 2, ml: 2 }}
+                                        onClick={() => navigate('/gerenciar-user')} // Simula login
+                                    >
+                                        Usuários
+                                    </Button>
+                    )}
                     {processos.length !== 0 && processos.map((atendimento) => (
                         <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
                     ))}
                     {processos.length === 0 && (
                         <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>
-                            Nenhum processo em andamento.
+                            Nenhum atendimento em andamento.
                         </Typography>
                     )}
                 </Container>

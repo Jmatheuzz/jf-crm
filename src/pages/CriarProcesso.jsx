@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { MenuItem, Select } from "@mui/material";
 import logo from '../assets/imgs/logo-1.png';
 
-export default function CriarAtendimento() {
+export default function CriarProcesso() {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [selectedCorretor, setSelectedCorretor] = useState(null);
   const [selectedInteresse, setSelectedInteresse] = useState("Compra de Imóvel");
@@ -44,12 +44,12 @@ export default function CriarAtendimento() {
 
   async function criarAtendimento() {
     try {
-      const {data} = await apiBase.post("/atendimentos", {
+      const {data} = await apiBase.post("/processos", {
         cliente_id: selectedCliente.id,
         corretor_id: selectedCorretor.id,
         interesse: selectedInteresse
       })
-      navigate(`/atendimentos/${data.id}`)
+      navigate(`/processos/${data.id}`)
     } catch (err) {
 
     }
@@ -59,7 +59,7 @@ export default function CriarAtendimento() {
     <div className="p-4 max-w-md mx-auto">
       <img src={logo} alt="logo" style={{ width: '100px'}} />
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Criar Atendimento
+          Criar Processo
       </Typography>
       <FindUser
         fetchUsers={fetchUsers}
@@ -68,14 +68,15 @@ export default function CriarAtendimento() {
         onChange={(newCliente) => setSelectedCliente(newCliente)}
       />
 
-      
+      {
+        ['ADMIN'].includes(localStorage.getItem('role')) &&
         <FindUser
         fetchUsers={fetchCorretores}
         label="Buscar corretor"
         value={selectedCorretor}
         onChange={(newCliente) => setSelectedCorretor(newCliente)}
       />
-      
+      }
 
       <Select
         value={selectedInteresse}

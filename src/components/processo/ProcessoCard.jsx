@@ -6,9 +6,9 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Person from '@mui/icons-material/Person';
 import CalendarMonth from '@mui/icons-material/CalendarMonth';
-import { formatISOToLocaleDate } from '../utils';
+import { formatISOToLocaleDate } from '../../utils';
 
-export default function AtendimentoCard({ atendimento }){
+export default function ProcessoCard({ atendimento }){
     return (
         <Card 
         elevation={2} 
@@ -17,7 +17,7 @@ export default function AtendimentoCard({ atendimento }){
     >
         <CardContent sx={{ p: 2 }}>
             <Typography variant="subtitle2" color="text.secondary">
-                Atendimento N° {atendimento.id}
+                Processo N° {atendimento?.id}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'bold', my: 0.5 }}>
                 {atendimento.interesse}

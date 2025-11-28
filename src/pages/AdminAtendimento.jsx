@@ -17,8 +17,9 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import AtendimentoCard from "../components/atendimento/AtendimentoCard"
 
-export default function AdminProcesso() {
+export default function AdminAtendimento() {
     const [processos, setProcessos] = useState([]);
     const [esteira, setEsteira] = useState([]);
     const [visitas, setVisitas] = useState([]);
@@ -45,13 +46,13 @@ export default function AdminProcesso() {
     const stages = [{ value: 'Todos', label: 'Todos' }, ...Object.entries(stageEnum).map(([value, label]) => ({ value, label }))];
 
     async function getProcesses() {
-        const { data } = await apiBase.get('/processos')
+        const { data } = await apiBase.get('/atendimentos')
         setProcessos(data)
     }
 
     async function avancarEtapa(processoId) {
         try {
-            await apiBase.post(`/processos/${processoId}/proxima-etapa`);
+            await apiBase.post(`/atendimentos/${processoId}/proxima-etapa`);
             await getProcesses();
         } catch (e) {
             console.error("Erro ao avançar etapa:", e);
@@ -60,7 +61,7 @@ export default function AdminProcesso() {
 
     async function etapaAnterior(processoId) {
         try {
-            await apiBase.post(`/processos/${processoId}/etapa-anterior`);
+            await apiBase.post(`/atendimentos/${processoId}/etapa-anterior`);
             await getProcesses();
         } catch (e) {
             console.error("Erro ao retroceder etapa:", e);
@@ -95,7 +96,7 @@ export default function AdminProcesso() {
             <AppBar position="static" color="transparent" elevation={0}>
                 <Toolbar sx={{ justifyContent: 'space-between' }}>
                     <Typography variant="h6">
-                        Processos
+                        Atendimentos
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -107,8 +108,8 @@ export default function AdminProcesso() {
                             
                             size="large"
                             sx={{ mt: 3, mb: 2 }}
-                            onClick={() => navigate('/criar-processo')}>
-                                Criar processo
+                            onClick={() => navigate('/criar-atendimento')}>
+                                Criar atendimento
 
                             </Button>
                     )}
@@ -135,11 +136,11 @@ export default function AdminProcesso() {
                         </Select>
                     </FormControl>
                     {filteredProcessos.length !== 0 && filteredProcessos.map((atendimento) => (
-                        <ProcessoCard key={atendimento.id} atendimento={atendimento} />
+                        <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
                     ))}
                     {filteredProcessos.length === 0 && (
                         <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>
-                            Nenhum processo em andamento.
+                            Nenhum atendimento em andamento.
                         </Typography>
                     )}
                 </Container>

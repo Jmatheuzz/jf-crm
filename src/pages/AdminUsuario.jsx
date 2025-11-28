@@ -6,6 +6,7 @@ import Carousel from '../components/Carousel';
 import { Checkbox, FormControlLabel, MenuItem, Select } from '@mui/material';
 import ConfirmationModal from '../components/ConfirmationModal';
 import TextField from "@mui/material/TextField"; // Added import
+import FindUser from '../components/FindUser';
 
 export const AdminUsuario = () => {
   const [usuarios, seetUsuarios] = useState([]);
@@ -170,13 +171,17 @@ const UsuarioModal = ({ usuario, onClose, onSuccess }) => {
     renda: usuario?.renda || 0,
     profissao: usuario?.profissao || '',
     estado_civil: usuario?.estado_civil || '',
-    possui_fgts: usuario?.possui_fgts || false,
+    possui_fgts: usuario?.possui_fgts,
+    possui_filhos_menor: usuario?.possui_filhos_menor,
   });
   const [loading, setLoading] = useState(false);
 
   async function saveImovel() {
     setLoading(true);
     try {
+      if (formData.role === 'CLIENTE') {
+        formData.password = 'senhajfcliente637495';
+      }
       if (usuario) {
         await apiBase.put(`/users/${usuario.id}`, { ...formData });
       } else {
@@ -205,7 +210,17 @@ const UsuarioModal = ({ usuario, onClose, onSuccess }) => {
   const removePhoto = (index) => {
     setPhotos(fotos.filter((_, i) => i !== index));
   };
+  const [selectedCorretor, setSelectedCorretor] = useState(null);
+const fetchCorretores = async (query) => {
 
+    try {
+      const res = await apiBase.get(`/users?role=${'CORRETOR'}&search=${query}`);
+      return res.data; // [{ id, nome, cpf }]
+    } catch (err) {
+      console.error("Erro ao buscar clientes:", err);
+      return [];
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-[#004b49] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -337,12 +352,22 @@ const UsuarioModal = ({ usuario, onClose, onSuccess }) => {
               <FormControlLabel 
                               control={<Checkbox />} 
                               label="Possui FGTS?" 
+                              value={formData.possui_fgts}
                               onChange={(e) => setFormData({ ...formData, possui_fgts: e.target.checked })}
+                          />
+            </div>
+            <div>
+              <FormControlLabel 
+                              control={<Checkbox />} 
+                              label="Possui filho menor de idade?" 
+                              value={formData.possui_filhos_menor}
+                              onChange={(e) => setFormData({ ...formData, possui_filhos_menor: e.target.checked })}
                           />
             </div>
             </>
           )}
-          <div>
+          {
+            formData.role !== 'CLIENTE' && <div>
             <label className="block text-sm font-medium text-text-primary mb-2">Senha</label>
             <input
               value={formData.password}
@@ -352,6 +377,7 @@ const UsuarioModal = ({ usuario, onClose, onSuccess }) => {
               required
             />
           </div>
+          }
 
           <div className="flex space-x-3 pt-4">
             <button

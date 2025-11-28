@@ -19,11 +19,11 @@ import TextField from "@mui/material/TextField";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { apiBase } from "../network/api";
+import { apiBase } from "../../network/api";
 import Button from "@mui/material/Button";
-import FindImovel from "./FindImovel";
+import FindImovel from "../FindImovel";
 
-const ProcessoTask = ({ label, status }) => {
+const AtendimentoTask = ({ label, status }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
 
     return (
@@ -41,7 +41,7 @@ const ProcessoTask = ({ label, status }) => {
         </ListItem>
     );
 };
-export const ProcessoDetailScreen = ({ processo }) => {
+export const AtendimentoDetailScreen = ({ processo }) => {
     const { id } = useParams();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -54,7 +54,8 @@ export const ProcessoDetailScreen = ({ processo }) => {
     useEffect(() => {
         async function getData() {
             try {
-                const { data } = await apiBase.get(`/processos/${id}`);
+                const { data } = await apiBase.get(`/atendimentos/${id}`);
+            
                 setData(data);
                 setObservacao(data.processo.observacao || '');
             } finally {
@@ -66,7 +67,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
 
     async function proximaEtapa() {
         try {
-            await apiBase.post(`/processos/${id}/proxima-etapa`)
+            await apiBase.post(`/atendimentos/${id}/proxima-etapa`)
         } catch (e) {
 
         } finally {
@@ -76,7 +77,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
 
     async function etapaAnterior() {
         try {
-            await apiBase.post(`/processos/${id}/etapa-anterior`)
+            await apiBase.post(`/atendimentos/${id}/etapa-anterior`)
         } catch (e) {
 
         } finally {
@@ -86,7 +87,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
 
     async function adicionarImovel() {
         try {
-            await apiBase.post(`/processos/${id}/adicionar-imovel`, {
+            await apiBase.post(`/atendimentos/${id}/adicionar-imovel`, {
                 imovel_id: selectedImovel.id
             })
         } catch (e) {
@@ -98,10 +99,23 @@ export const ProcessoDetailScreen = ({ processo }) => {
 
     async function handleSaveObservacao() {
         try {
-            await apiBase.put(`/processos/${id}`, { observacao });
+            await apiBase.put(`/atendimentos/${id}`, { observacao });
             setObservacaoChanged(false);
         } catch (error) {
             console.error('Error saving observation:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleActive(value) {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { is_active: value });
+            setObservacaoChanged(false);
+        } catch (error) {
+            console.error('Error saving observation:', error);
+        } finally {
+            window.location.reload();
         }
     }
 
@@ -123,8 +137,8 @@ export const ProcessoDetailScreen = ({ processo }) => {
         <Box sx={{ height: '100vh', bgcolor: 'background.default' }}>
             <AppBar position="static" color="primary" elevation={0}>
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        Atendimento {data.processo.id}
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: data.processo.is_active ?'white': 'red'}}>
+                        Atendimento {data.processo.id} {data.processo.is_active ? '' : '(Encerrado)'}
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -148,16 +162,6 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {data.processo.interesse}
                         </Typography>
-                        {
-                            ['ADMIN'].includes(localStorage.getItem('role')) && !data.processo?.imovel?.id && (
-                                <FindImovel
-                                    fecthImoveis={fetchImoveis}
-                                    label="Selecionar imóvel"
-                                    value={selectedImovel}
-                                    onChange={(newImovel) => setSelectedImovel(newImovel)}
-                                />
-                            )
-                        }
                         {
                             data.processo?.imovel?.id && (
                                 (
@@ -183,13 +187,13 @@ export const ProcessoDetailScreen = ({ processo }) => {
                     <CardContent>
                         <List disablePadding>
                             {data.timeline && data.timeline.map((etapa, index) => (
-                                <ProcessoTask key={index} label={etapa.descricao} status={etapa.status} />
+                                <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
                             ))}
                         </List>
                     </CardContent>
                 </Card>
                 {
-                    localStorage.getItem('role') === 'ADMIN' && (
+                    localStorage.getItem('role') === 'ATENDIMENTO' && (
                         <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
                             <Button
                                 variant="contained"
@@ -247,6 +251,14 @@ export const ProcessoDetailScreen = ({ processo }) => {
                             >
                                 Salvar Observação
                             </Button>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2, ml: 2 }}
+                                onClick={() => handleActive(!data.processo.is_active)}
+                            >
+                                {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
+                            </Button>
                         </Card>
                     )
                 }
@@ -254,3 +266,6 @@ export const ProcessoDetailScreen = ({ processo }) => {
         </Box>
     )
 };
+
+
+
