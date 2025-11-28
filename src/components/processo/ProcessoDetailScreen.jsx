@@ -122,6 +122,9 @@ export const ProcessoDetailScreen = ({ processo }) => {
             processoInfo.push(["Imóvel", data.processo.imovel.endereco]);
             processoInfo.push(["Valor do Imóvel", `R$ ${data.processo.imovel.valor}`]);
         }
+        if (observacao) {
+            processoInfo.push(["Observação", observacao]);
+        }
 
         autoTable(doc, {
             startY: 20,
