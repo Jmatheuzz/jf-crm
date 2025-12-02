@@ -6,13 +6,14 @@ import FindUser from "../components/FindUser";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { MenuItem, Select } from "@mui/material";
+import { MenuItem, Select, TextField } from "@mui/material";
 import logo from '../assets/imgs/logo-1.png';
 
 export default function CriarProcesso() {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [selectedCorretor, setSelectedCorretor] = useState(null);
   const [selectedInteresse, setSelectedInteresse] = useState("Compra de Imóvel");
+  const [correspondenteBancario, setCorrespondeBancario] = useState("");
 
   const navigate = useNavigate()
 
@@ -47,7 +48,8 @@ export default function CriarProcesso() {
       const {data} = await apiBase.post("/processos", {
         cliente_id: selectedCliente.id,
         corretor_id: selectedCorretor.id,
-        interesse: selectedInteresse
+        interesse: selectedInteresse,
+        correspondenteBancario: correspondenteBancario
       })
       navigate(`/processos/${data.id}`)
     } catch (err) {
@@ -88,6 +90,14 @@ export default function CriarProcesso() {
         <MenuItem value="Compra de Lote">Compra de Lote</MenuItem>
         <MenuItem value="Aluguel de Imóvel">Aluguel de Imóvel</MenuItem>
       </Select>
+
+      <TextField
+        label="Corresponde Bancário"
+        value={correspondenteBancario}
+        onChange={(e) => setCorrespondeBancario(e.target.value)}
+        fullWidth
+        sx={{ mt: 2 }}
+      />
 
       <Button
                 variant="contained"

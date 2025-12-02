@@ -135,7 +135,7 @@ export default function AdminProcesso() {
                         </Select>
                     </FormControl>
                     {filteredProcessos.length !== 0 && filteredProcessos.map((atendimento) => (
-                        <ProcessoCard key={atendimento.id} atendimento={atendimento} />
+                        <ProcessoCard key={atendimento.id} processo={atendimento} />
                     ))}
                     {filteredProcessos.length === 0 && (
                         <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>

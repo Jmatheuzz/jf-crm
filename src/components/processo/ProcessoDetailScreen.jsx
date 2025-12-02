@@ -20,15 +20,16 @@ import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiBase } from "../../network/api";
-import Button from "@mui/material/Button";
 import FindImovel from "../FindImovel";
+import UsuarioModal from "../UsuarioModal";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Button } from "@mui/material";
 
-const ProcessoTask = ({ label, status }) => {
+const ProcessoTask = ({ label, status, isAtual }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
-
+    
     return (
         <ListItem disablePadding sx={{ py: 0.5 }}>
             <Grid container alignItems="center">
@@ -37,8 +38,8 @@ const ProcessoTask = ({ label, status }) => {
                 </Grid>
                 <Grid item xs={2} sx={{ px: 0.5 }} textAlign="right">
                     {status == 'CONCLUIDA' && <CheckCircleOutline color={color} />}
-                    {status == 'PENDENTE' && <LockClockOutlined color={color} />}
-                    {status == 'EM_ANDAMENTO' && <RadioButtonUnchecked color={color} />}
+                    {!isAtual && status == 'PENDENTE' && <LockClockOutlined color={color} />}
+                    {isAtual && status == 'PENDENTE' && <RadioButtonUnchecked color={color} />}
                 </Grid>
             </Grid>
         </ListItem>
@@ -51,6 +52,10 @@ export const ProcessoDetailScreen = ({ processo }) => {
     const [selectedImovel, setSelectedImovel] = useState(null);
     const [observacao, setObservacao] = useState('');
     const [observacaoChanged, setObservacaoChanged] = useState(false);
+    const [correspondenteBancario, setCorrespondeBancario] = useState('');
+    const [correspondenteBancarioChanged, setCorrespondeBancarioChanged] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingCliente, setEditingCliente] = useState(null);
 
     const navigate = useNavigate()
 
@@ -60,6 +65,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                 const { data } = await apiBase.get(`/processos/${id}`);
                 setData(data);
                 setObservacao(data.processo.observacao || '');
+                setCorrespondeBancario(data.processo.correspondenteBancario || '');
             } finally {
                 setLoading(false);
             }
@@ -83,7 +89,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
         } catch (e) {
 
         } finally {
-            window.location.reload();
+            //window.location.reload();
         }
     }
 
@@ -108,6 +114,15 @@ export const ProcessoDetailScreen = ({ processo }) => {
         }
     }
 
+    async function handleSaveCorrespondeBancario() {
+        try {
+            await apiBase.put(`/processos/${id}`, { correspondenteBancario });
+            setCorrespondeBancarioChanged(false);
+        } catch (error) {
+            console.error('Error saving observation:', error);
+        }
+    }
+
     const handlePdfExport = () => {
         const doc = new jsPDF();
         doc.text(`Resumo do Processo N°: ${data.processo.id}`, 14, 16);
@@ -117,6 +132,10 @@ export const ProcessoDetailScreen = ({ processo }) => {
             ["Corretor", data.processo.corretor.name],
             ["Interesse", data.processo.interesse],
         ];
+
+        if (data.processo.correspondenteBancario) {
+            processoInfo.push(["Corresponde Bancário", data.processo.correspondenteBancario]);
+        }
 
         if (data.processo.imovel) {
             processoInfo.push(["Imóvel", data.processo.imovel.endereco]);
@@ -180,6 +199,20 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                 Cliente: {data.processo.cliente.name}
+                                {
+                                    localStorage.getItem('role') === 'CORRETOR' &&
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                        onClick={() => {
+                                            setEditingCliente(data.processo.cliente)
+                                            setIsEditModalOpen(true)
+                                        }}
+                                    >
+                                        Editar Cliente
+                                    </Button>
+                                }
                             </Typography>)}
                         {['ADMIN', 'ATENDIMENTO', 'CLIENTE'].includes(localStorage.getItem('role')) && (
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -192,6 +225,11 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {data.processo.interesse}
                         </Typography>
+                        {data.processo.correspondenteBancario && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Corresponde Bancário: {data.processo.correspondenteBancario}
+                            </Typography>
+                        )}
                         {
                             ['ADMIN'].includes(localStorage.getItem('role')) && !data.processo?.imovel?.id && (
                                 <FindImovel
@@ -227,7 +265,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                     <CardContent>
                         <List disablePadding>
                             {data.timeline && data.timeline.map((etapa, index) => (
-                                <ProcessoTask key={index} label={etapa.descricao} status={etapa.status} />
+                                <ProcessoTask key={index} label={etapa.descricao} status={etapa.status} isAtual={etapa.chave === data.processo.etapa}/>
                             ))}
                         </List>
                     </CardContent>
@@ -278,6 +316,35 @@ export const ProcessoDetailScreen = ({ processo }) => {
                     localStorage.getItem('role') === 'ADMIN' && (
                         <Card sx={{ mt: 3, p: 2 }}>
                             <Typography variant="h6" sx={{ mb: 2 }}>
+                                Corresponde Bancário
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={1}
+                                value={correspondenteBancario}
+                                onChange={(e) => {
+                                    setCorrespondeBancario(e.target.value);
+                                    setCorrespondeBancarioChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveCorrespondeBancario}
+                                disabled={!correspondenteBancarioChanged}
+                            >
+                                Salvar Corresponde Bancário
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    localStorage.getItem('role') === 'ADMIN' && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
                                 Observação do Processo
                             </Typography>
                             <TextField
@@ -303,6 +370,16 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         </Card>
                     )
                 }
+                {isEditModalOpen && (
+                    <UsuarioModal
+                        usuario={editingCliente}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onSuccess={() => {
+                            setIsEditModalOpen(false);
+                            window.location.reload();
+                        }}
+                    />
+                )}
             </Container>
         </Box>
     )

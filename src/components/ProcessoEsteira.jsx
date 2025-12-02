@@ -17,7 +17,7 @@ const DraggableAtendimentoCard = ({ atendimento }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <ProcessoCard atendimento={atendimento} isDraggable={true} />
+      <ProcessoCard processo={atendimento} isDraggable={true} />
     </div>
   );
 };
@@ -33,7 +33,7 @@ const DroppableColumn = ({ title, esteira }) => {
         <h2 className="text-lg font-semibold">{title}</h2>
         <span className="text-sm text-gray-500">{esteira?.length ?? 0} atendimentos</span>
       </div>
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2 max-h-[75vh] overflow-y-auto">
         {esteira?.map((atendimento) => (
           <DraggableAtendimentoCard key={atendimento.id} atendimento={atendimento} />
         ))}

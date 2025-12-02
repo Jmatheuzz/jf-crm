@@ -13,15 +13,22 @@ import { VisitCard } from "../components/VisitCard";
 import Button from "@mui/material/Button"
 import { useNavigate } from "react-router-dom";
 import logo from '../assets/imgs/logo-1.png';
+import ProcessoCard from "../components/processo/ProcessoCard"
 
 export default function Home() {
+    const [atendimentos, setAtendimentos] = useState([]);
     const [processos, setProcessos] = useState([]);
     const [visitas, setVisitas] = useState([]);
     const [tabValue, setTabValue] = useState(0);
     const [loading, setLoading] = useState(false)
 
-    async function getProcesses() {
+    async function getAtendimentos() {
         const { data } = await apiBase.get('/atendimentos')
+        setAtendimentos(data)
+    }
+
+    async function getProcessos() {
+        const { data } = await apiBase.get('/processos')
         setProcessos(data)
     }
 
@@ -36,7 +43,8 @@ export default function Home() {
         async function getData() {
             try {
                 setLoading(true)
-                await getProcesses()
+                await getAtendimentos()
+                await getProcessos()
                 await getVisitas()
             } finally {
                 setLoading(false)
@@ -63,6 +71,7 @@ export default function Home() {
                 <Divider />
                 <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} variant="fullWidth">
                     <Tab label="Atendimentos" />
+                    <Tab label="Processos" />
                     <Tab label="Visitas" />
                 </Tabs>
             </AppBar>
@@ -89,10 +98,10 @@ export default function Home() {
                                         Usuários
                                     </Button>
                     )}
-                    {processos.length !== 0 && processos.map((atendimento) => (
+                    {atendimentos.length !== 0 && atendimentos.map((atendimento) => (
                         <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
                     ))}
-                    {processos.length === 0 && (
+                    {atendimentos.length === 0 && (
                         <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>
                             Nenhum atendimento em andamento.
                         </Typography>
@@ -100,6 +109,18 @@ export default function Home() {
                 </Container>
             )}
             {tabValue === 1 && (
+                <Container sx={{ py: 2 }}>
+                    {processos.length !== 0 && processos.map((processo) => (
+                        <ProcessoCard key={processo.id} processo={processo} onUpdateStatus={() => getProcessos()} />
+                    ))}
+                    {processos.length === 0 && (
+                        <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>
+                            Nenhuma processo encontrado.
+                        </Typography>
+                    )}
+                </Container>
+            )}
+            {tabValue === 2 && (
                 <Container sx={{ py: 2 }}>
                     {['CORRETOR', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
                         <Button variant="contained"

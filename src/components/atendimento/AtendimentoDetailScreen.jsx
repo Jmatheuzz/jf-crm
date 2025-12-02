@@ -22,6 +22,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiBase } from "../../network/api";
 import Button from "@mui/material/Button";
 import FindImovel from "../FindImovel";
+import UsuarioModal from "../UsuarioModal";
 
 const AtendimentoTask = ({ label, status }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
@@ -48,6 +49,8 @@ export const AtendimentoDetailScreen = ({ processo }) => {
     const [selectedImovel, setSelectedImovel] = useState(null);
     const [observacao, setObservacao] = useState('');
     const [observacaoChanged, setObservacaoChanged] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingCliente, setEditingCliente] = useState(null);
 
     const navigate = useNavigate()
 
@@ -143,127 +146,149 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                 </Toolbar>
             </AppBar>
 
-            <Container sx={{ py: 3 }}>
-                {/* INFORMAÇÕES DO CORRETOR */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent sx={{ pb: 1 }}>
-                        {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                Cliente: {data.processo.cliente.name}
-                            </Typography>)}
-                        {['ADMIN', 'ATENDIMENTO', 'CLIENTE'].includes(localStorage.getItem('role')) && (
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                Corretor: {data.processo.corretor.name}
-                            </Typography>)}
-                        {localStorage.getItem('role') === 'CLIENTE' && (
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                Whatsapp: {data.processo.corretor.telefone}
-                            </Typography>)}
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                            {data.processo.interesse}
-                        </Typography>
-                        {
-                            data.processo?.imovel?.id && (
-                                (
-                                    <>
-                                        <Typography variant="subtitle1">
-                                            Endereço: {data.processo.imovel.endereco}
-                                        </Typography>
-                                        <Typography variant="subtitle1">
-                                            Valor: R$ {data.processo.imovel.valor}
-                                        </Typography>
-                                    </>
-                                )
-                            )
-                        }
-
-                    </CardContent>
-                </Card>
-
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
-                    Etapas
-                </Typography>
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <List disablePadding>
-                            {data.timeline && data.timeline.map((etapa, index) => (
-                                <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
-                            ))}
-                        </List>
-                    </CardContent>
-                </Card>
-                {
-                    localStorage.getItem('role') === 'ATENDIMENTO' && (
-                        <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            <Button
-                                variant="contained"
-
-                                size="large"
-                                sx={{ mt: 3, mb: 2 }}
-                                onClick={() => etapaAnterior()} // Simula criação e avança
-                            >Anterior</Button>
-
+            		<Container sx={{ py: 3 }}>
+                            {/* INFORMAÇÕES DO CORRETOR */}
+                            <Card elevation={2} sx={{ mb: 3 }}>
+                                <CardContent sx={{ pb: 1 }}>
+                                    {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                            Cliente: {data.processo.cliente.name}
+                                                                            {
+                                                                                localStorage.getItem('role') === 'CORRETOR' &&
+                                                                                <Button
+                                                                                    variant="contained"
+                                                                                    size="small"
+                                                                                    sx={{ ml: 2 }}
+                                                                                    onClick={() => {
+                                                                                        setEditingCliente(data.processo.cliente)
+                                                                                        setIsEditModalOpen(true)
+                                                                                    }}
+                                                                                >
+                                                                                    Editar Cliente
+                                                                                </Button>
+                                                                            }
+                                                                        </Typography>)}                                    {['ADMIN', 'ATENDIMENTO', 'CLIENTE'].includes(localStorage.getItem('role')) && (
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                            Corretor: {data.processo.corretor.name}
+                                        </Typography>)}
+                                    {localStorage.getItem('role') === 'CLIENTE' && (
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                            Whatsapp: {data.processo.corretor.telefone}
+                                        </Typography>)}
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                        {data.processo.interesse}
+                                    </Typography>
+                                    {
+                                        data.processo?.imovel?.id && (
+                                            (
+                                                <>
+                                                    <Typography variant="subtitle1">
+                                                        Endereço: {data.processo.imovel.endereco}
+                                                    </Typography>
+                                                    <Typography variant="subtitle1">
+                                                        Valor: R$ {data.processo.imovel.valor}
+                                                    </Typography>
+                                                </>
+                                            )
+                                        )
+                                    }
+            
+                                </CardContent>
+                            </Card>
+            
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
+                                Etapas
+                            </Typography>
+                            <Card elevation={2} sx={{ mb: 3 }}>
+                                <CardContent>
+                                    <List disablePadding>
+                                        {data.timeline && data.timeline.map((etapa, index) => (
+                                            <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
+                                        ))}
+                                    </List>
+                                </CardContent>
+                            </Card>
                             {
-                                selectedImovel && (
-                                    <Button
-                                        variant="contained"
-
-                                        size="large"
-                                        sx={{ mt: 3, mb: 2 }}
-                                        onClick={() => adicionarImovel()} // Simula criação e avança
-                                    >Salvar imóvel</Button>
+                                localStorage.getItem('role') === 'ATENDIMENTO' && (
+                                    <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                                        <Button
+                                            variant="contained"
+            
+                                            size="large"
+                                            sx={{ mt: 3, mb: 2 }}
+                                            onClick={() => etapaAnterior()} // Simula criação e avança
+                                        >Anterior</Button>
+            
+                                        {
+                                            selectedImovel && (
+                                                <Button
+                                                    variant="contained"
+            
+                                                    size="large"
+                                                    sx={{ mt: 3, mb: 2 }}
+                                                    onClick={() => adicionarImovel()} // Simula criação e avança
+                                                >Salvar imóvel</Button>
+                                            )
+                                        }
+            
+                                        <Button
+                                            variant="contained"
+            
+                                            size="large"
+                                            sx={{ mt: 3, mb: 2 }}
+                                            onClick={() => proximaEtapa()} // Simula criação e avança
+                                        >Proximo</Button>
+                                    </Card>
                                 )
                             }
-
-                            <Button
-                                variant="contained"
-
-                                size="large"
-                                sx={{ mt: 3, mb: 2 }}
-                                onClick={() => proximaEtapa()} // Simula criação e avança
-                            >Proximo</Button>
-                        </Card>
-                    )
-                }
-                {
-                    localStorage.getItem('role') === 'ADMIN' && (
-                        <Card sx={{ mt: 3, p: 2 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                Observação do Processo
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={4}
-                                value={observacao}
-                                onChange={(e) => {
-                                    setObservacao(e.target.value);
-                                    setObservacaoChanged(true);
-                                }}
-                                variant="outlined"
-                            />
-                            <Button
-                                variant="contained"
-                                size="large"
-                                sx={{ mt: 2 }}
-                                onClick={handleSaveObservacao}
-                                disabled={!observacaoChanged}
-                            >
-                                Salvar Observação
-                            </Button>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                sx={{ mt: 2, ml: 2 }}
-                                onClick={() => handleActive(!data.processo.is_active)}
-                            >
-                                {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
-                            </Button>
-                        </Card>
-                    )
-                }
-            </Container>
-        </Box>
+                            {
+                                localStorage.getItem('role') === 'ADMIN' && (
+                                    <Card sx={{ mt: 3, p: 2 }}>
+                                        <Typography variant="h6" sx={{ mb: 2 }}>
+                                            Observação do Processo
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={4}
+                                            value={observacao}
+                                            onChange={(e) => {
+                                                setObservacao(e.target.value);
+                                                setObservacaoChanged(true);
+                                            }}
+                                            variant="outlined"
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            size="large"
+                                            sx={{ mt: 2 }}
+                                            onClick={handleSaveObservacao}
+                                            disabled={!observacaoChanged}
+                                        >
+                                            Salvar Observação
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            size="large"
+                                            sx={{ mt: 2, ml: 2 }}
+                                            onClick={() => handleActive(!data.processo.is_active)}
+                                        >
+                                            {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
+                                        </Button>
+                                    </Card>
+                                )
+                            }
+                             {isEditModalOpen && (
+                                <UsuarioModal
+                                    usuario={editingCliente}
+                                    onClose={() => setIsEditModalOpen(false)}
+                                    onSuccess={() => {
+                                        setIsEditModalOpen(false);
+                                        window.location.reload();
+                                    }}
+                                />
+                            )}
+                        </Container>        </Box>
     )
 };
 

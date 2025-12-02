@@ -11,7 +11,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { formatISOToLocale, formatISOToLocaleDate } from '../utils';
+import { formatISOToLocale, formatISOToLocaleDate, formatToBRL } from '../utils';
 import { apiBase } from '../network/api';
 
 // --- Componente VisitCard ---
@@ -20,8 +20,8 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
     const isPago = comissao.pago;
     const statusColor = isPago ? 'success' : 'warning';
     const statusLabel = isPago ? 'Pago' : 'Pendente';
-    async function confirmarVisita(id) {
-        const { data } = await apiBase.put(`/comissoes/${id}`, { pago: true })
+    async function confirmarVisita(id, value) {
+        const { data } = await apiBase.put(`/comissoes/${id}`, { pago: value })
         onUpdateStatus()
     }
     return (
@@ -37,6 +37,24 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                                 Criado em: {formatISOToLocaleDate(comissao.created_at)}
                             </Typography>
                         </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                            <Typography variant="body2" color="text.secondary">
+                                Valor: {formatToBRL(comissao.valor)}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                            <Typography variant="body2" color="text.secondary">
+                                Corretor: {comissao.processo_habitacional.corretor.name}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                            <Typography variant="body2" color="text.secondary">
+                                Cliente: {comissao.processo_habitacional.cliente.name}
+                            </Typography>
+                        </Box>
 
                         <Chip
                             label={statusLabel}
@@ -44,23 +62,24 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                             size="small"
                             icon={isPago ? <CheckCircleIcon /> : null}
                         />
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                            
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => confirmarVisita(comissao.id, !isPago)}
+                                startIcon={<CheckCircleIcon />}
+                            >
+                                {isPago ? 'Marcar como Pendente' : 'Marcar como Pago'}
+                            </Button>
+                            
+                        </Box>
                     </Grid>
 
                     {/* Endereço e Ação (Botão) */}
                     <Grid item xs={12} sm={6}>
 
-                        <Box textAlign="right">
-                            {!isPago && (
-                                <Button
-                                    variant="contained"
-                                    size="small"
-                                    onClick={() => confirmarVisita(comissao.id)}
-                                    startIcon={<CheckCircleIcon />}
-                                >
-                                    Marcar como Recebido
-                                </Button>
-                            )}
-                        </Box>
+                        
                         
                     </Grid>
                 </Grid>

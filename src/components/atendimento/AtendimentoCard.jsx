@@ -32,6 +32,9 @@ export default function AtendimentoCard({ atendimento, isDraggable }){
                     Atendimento N° {atendimento.id} {atendimento.is_active ? '' : '(Encerrado)'}
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 'bold', my: 0.5 }}>
+                    {atendimento.descricao_etapa}
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', my: 0.5 }}>
                     {atendimento.interesse}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mt: 1 }}>
@@ -40,7 +43,7 @@ export default function AtendimentoCard({ atendimento, isDraggable }){
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
                     <Person fontSize="small" sx={{ mr: 1 }} />
-                    {['CLIENTE', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && <Typography variant="caption">Corretor: {atendimento.corretor.name}</Typography>}
+                    {['CLIENTE', 'ATENDIMENTO', 'ADMIN', 'CORRETOR'].includes(localStorage.getItem('role')) && <Typography variant="caption">Corretor: {atendimento.corretor.name}</Typography>}
                 
                 </Box>
                  <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
