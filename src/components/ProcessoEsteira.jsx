@@ -33,7 +33,7 @@ const DroppableColumn = ({ title, esteira }) => {
         <h2 className="text-lg font-semibold">{title}</h2>
         <span className="text-sm text-gray-500">{esteira?.length ?? 0} atendimentos</span>
       </div>
-      <div className="p-2 space-y-2 max-h-[75vh] overflow-y-auto">
+      <div className="p-2 space-y-2 max-h-[75vh]">
         {esteira?.map((atendimento) => (
           <DraggableAtendimentoCard key={atendimento.id} atendimento={atendimento} />
         ))}
@@ -50,7 +50,7 @@ const ProcessoEsteira = () => {
   const etapas = {
         'Contrato de Empreitada'   :esteira['Contrato de Empreitada'],
         'Confecção do Projeto'     :esteira['Confecção do Projeto'],
-        'Entrega na Prefeitura'    :esteira['Entrega na Prefeitura'],
+        'Aprovação municipal'    :esteira['Aprovação municipal'],
         'Abertura de Ordem de serviço' :esteira['Abertura de Ordem de serviço'],
         'AVALIACAO_CAIXA' :esteira['Avaliação da engenharia caixa'],
         'Conformidade do processo' :esteira['Conformidade do processo'],
@@ -79,7 +79,7 @@ const ProcessoEsteira = () => {
   const stages = Object.keys(etapas);
   async function avancarEtapa(processoId) {
     try {
-      await apiBase.post(`/atendimentos/${processoId}/proxima-etapa`);
+      await apiBase.post(`/processos/${processoId}/avancar-etapa-esteira`);
       await getProcesses();
     } catch (e) {
       console.error("Erro ao avançar etapa:", e);
@@ -87,7 +87,7 @@ const ProcessoEsteira = () => {
   }
   async function etapaAnterior(processoId) {
     try {
-      await apiBase.post(`/atendimentos/${processoId}/etapa-anterior`);
+      await apiBase.post(`/processos/${processoId}/etapa-anterior`);
       await getProcesses();
     } catch (e) {
       console.error("Erro ao retroceder etapa:", e);

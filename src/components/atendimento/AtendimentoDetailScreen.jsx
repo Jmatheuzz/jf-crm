@@ -242,7 +242,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                 )
                             }
                             {
-                                localStorage.getItem('role') === 'ADMIN' && (
+                                ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
                                     <Card sx={{ mt: 3, p: 2 }}>
                                         <Typography variant="h6" sx={{ mb: 2 }}>
                                             Observação do Processo
