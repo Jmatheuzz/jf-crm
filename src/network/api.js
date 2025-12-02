@@ -1,8 +1,8 @@
 import axios from "axios"
 
-export const apiBase = axios.create({baseURL: 'https://api.imobiliariajf.com/api'})
+export const apiBase = axios.create({baseURL: 'http://localhost:8000/api'})
 
-export const apiAuth = axios.create({baseURL: 'https://api.imobiliariajf.com/api/auth'})
+export const apiAuth = axios.create({baseURL: 'http://localhost:8000/api/auth'})
 
 apiBase.interceptors.request.use(
   (config) => {
