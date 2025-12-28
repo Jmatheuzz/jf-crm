@@ -24,6 +24,20 @@ apiAuth.interceptors.response.use(
   }
 );
 
+export const setToken = (token) => {
+  localStorage.setItem('token', token);
+};
+
+export const getUsuario = async () => {
+    const response = await apiBase.get('/me');
+    return response.data;
+};
+
+export const updateUsuario = async (id, userData) => {
+    const response = await apiBase.put(`/users/${id}`, userData);
+    return response.data;
+};
+
 apiBase.interceptors.response.use(
   (response) => response,
   (error) => {

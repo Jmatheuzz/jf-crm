@@ -11,19 +11,41 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { formatISOToLocale, formatISOToLocaleDate, formatToBRL } from '../utils';
+import { formatISOToLocaleDate, formatToBRL } from '../utils';
 import { apiBase } from '../network/api';
+import ConfirmationModal from './ConfirmationModal';
 
 // --- Componente VisitCard ---
 const ComissaoCard = ({ comissao, onUpdateStatus }) => {
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [comissaoToUpdate, setComissaoToUpdate] = useState(null);
+    const [newStatus, setNewStatus] = useState(null);
     // Define a cor e o ícone do Chip com base no status
     const isPago = comissao.pago;
     const statusColor = isPago ? 'success' : 'warning';
     const statusLabel = isPago ? 'Pago' : 'Pendente';
-    async function confirmarVisita(id, value) {
-        const { data } = await apiBase.put(`/comissoes/${id}`, { pago: value })
-        onUpdateStatus()
-    }
+
+    const handleConfirmAction = (id, value) => {
+        console.log('abc');
+        
+        setComissaoToUpdate(id);
+        setNewStatus(value);
+        setShowConfirmModal(true);
+    };
+
+    const executeConfirmarVisita = async () => {
+        try {
+            await apiBase.put(`/comissoes/${comissaoToUpdate}`, { pago: newStatus });
+            onUpdateStatus();
+        } catch (error) {
+            console.error("Erro ao atualizar status da comissão:", error);
+            // Optionally, show an error message to the user
+        } finally {
+            setShowConfirmModal(false);
+            setComissaoToUpdate(null);
+            setNewStatus(null);
+        }
+    };
     return (
         <Card sx={{ mb: 2, bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -43,6 +65,14 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                                 Valor: {formatToBRL(comissao.valor)}
                             </Typography>
                         </Box>
+                        {comissao.processo_habitacional?.imovel?.valor &&
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+                            <Typography variant="body2" color="text.secondary">
+                                Valor do imóvel: {formatToBRL(comissao.processo_habitacional.imovel.valor)}
+                            </Typography>
+                        </Box>
+                        }
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
                             <Typography variant="body2" color="text.secondary">
@@ -67,11 +97,12 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                             <Button
                                 variant="contained"
                                 size="small"
-                                onClick={() => confirmarVisita(comissao.id, !isPago)}
+                                onClick={() => handleConfirmAction(comissao.id, !isPago)}
                                 startIcon={<CheckCircleIcon />}
                             >
                                 {isPago ? 'Marcar como Pendente' : 'Marcar como Pago'}
                             </Button>
+                
                             
                         </Box>
                     </Grid>
@@ -83,6 +114,16 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                         
                     </Grid>
                 </Grid>
+                <ConfirmationModal
+                                open={showConfirmModal}
+                                onCancel={() => setShowConfirmModal(false)}
+                                onConfirm={executeConfirmarVisita}
+                                title={
+                                    isPago
+                                        ? 'Tem certeza que deseja marcar esta comissão como PENDENTE?'
+                                        : 'Tem certeza que deseja marcar esta comissão como PAGA?'
+                                }
+                            />
             </CardContent>
         </Card>
     );

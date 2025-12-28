@@ -14,6 +14,7 @@ import Button from "@mui/material/Button"
 import { useNavigate } from "react-router-dom";
 import logo from '../assets/imgs/logo-1.png';
 import ProcessoCard from "../components/processo/ProcessoCard"
+import SideMenu from "../components/SideMenu" // Import SideMenu
 
 export default function Home() {
     const [atendimentos, setAtendimentos] = useState([]);
@@ -59,12 +60,13 @@ export default function Home() {
     return (
         <Box sx={{ height: '100vh', bgcolor: 'background.default' }}>
             <AppBar position="static" color="transparent" elevation={0}>
-                <Toolbar sx={{ justifyContent: 'space-between' }}>
+                <Toolbar sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
+                    <SideMenu sx={{ mr: 2 }} /> {/* Add SideMenu here */}
                     <img src={logo} alt="logo" style={{ width: '150px'}} />
-                    <Typography variant="h6">
+                    <Typography variant="h6" sx={{ ml: 2 }}>
                         Atendimentos
                     </Typography>
-                    <Typography variant="subtitle1" color="text.secondary">
+                    <Typography variant="subtitle1" color="text.secondary" sx={{ ml: 'auto' }}>
                         Olá, {localStorage.getItem('name')}
                     </Typography>
                 </Toolbar>

@@ -26,7 +26,9 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
-
+import { AppBar, Tab, Tabs, Toolbar } from '@mui/material';
+import SideMenu from '../components/SideMenu';
+import logo from '../assets/imgs/logo-1.png';
 // --- Componente Principal ---
 export default function Dashboard() {
     // Função genérica para buscar dados
@@ -113,11 +115,18 @@ export default function Dashboard() {
 
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-                🚀 Painel de Gestão
-            </Typography>
-            <Button
+        <Box sx={{ mt: 4, mb: 4, width: '100%' }}>
+            <AppBar position="static" color="transparent" elevation={0}>
+                <Toolbar sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
+                    <SideMenu sx={{ mr: 2 }} /> {/* Add SideMenu here */}
+                    <img src={logo} alt="logo" style={{ width: '150px'}} />
+                    <Typography variant="subtitle1" color="text.secondary" sx={{ ml: 'auto' }}>
+                        Olá, {localStorage.getItem('name')}
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <Container sx={{py: 1}}>
+                <Button
                 variant="contained"
                 size="large"
                 sx={{ mt: 3, mb: 2, mr: 2 }}
@@ -232,7 +241,8 @@ export default function Dashboard() {
                     </Card>
                 </Grid>
             </Grid>
-        </Container>
+            </Container>
+        </Box>
     );
 };
 

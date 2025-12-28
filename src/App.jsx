@@ -23,6 +23,7 @@ import ProcessoEsteira from './components/ProcessoEsteira'
 import { Comissao } from './components/Comissao'
 import CriarProcesso from './pages/CriarProcesso'
 import AdminAtendimento from './pages/AdminAtendimento'
+import MyProfile from './pages/MyProfile' // Import MyProfile
 
 function App() {
 
@@ -49,6 +50,7 @@ function App() {
       <Route path="/esteira-atendimentos" element={<AtendimentoEsteira />} />
       <Route path="/esteira-processos" element={<ProcessoEsteira />} />
       <Route path="/comissoes" element={<Comissao />} />
+      <Route path="/my-profile" element={<MyProfile />} />
     </Routes>
   )
 }
