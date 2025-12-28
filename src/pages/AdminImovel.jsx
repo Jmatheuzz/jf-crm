@@ -5,7 +5,7 @@ import { formatToBRL, removeMask } from '../utils';
 import Carousel from '../components/Carousel';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useNavigate } from 'react-router-dom';
-import { MenuItem, Select } from '@mui/material';
+import { MenuItem, Select, Switch } from '@mui/material';
 
 export const AdminImovel = () => {
   const [properties, setProperties] = useState([]);
@@ -109,6 +109,11 @@ export const AdminImovel = () => {
                     <span>{property.area}m²</span>
                   </span>
                 </div>
+                <div className="flex items-center justify-between text-sm text-text-secondary mb-3">
+                  <span className={`text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full ${property.disponivel ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                    {property.disponivel ? 'Disponível' : 'Indisponível'}
+                  </span>
+                </div>
                 <p className="text-lg font-bold">
                   R$ {property.valor.toLocaleString('pt-BR')}
                 </p>
@@ -155,7 +160,8 @@ const PropertyModal = ({ property, onClose, onSuccess }) => {
     area: property?.area,
     numero_quartos: property?.numero_quartos,
     numero_banheiros: property?.numero_banheiros,
-    descricao: property?.descricao || ''
+    descricao: property?.descricao || '',
+    disponivel: property?.disponivel ?? true
   });
   const [fotos, setPhotos] = useState(property?.fotos || []);
   const [loading, setLoading] = useState(false);
@@ -290,6 +296,15 @@ const PropertyModal = ({ property, onClose, onSuccess }) => {
         
 
         <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-text-primary mb-2">Disponível</label>
+            <Switch
+              checked={formData.disponivel}
+              onChange={(e) => setFormData({ ...formData, disponivel: e.target.checked })}
+              name="disponivel"
+              color="primary"
+            />
+          </div>
           <Select
         value={selectedTipo}
         onChange={(e) => setSelectedTipo(e.target.value)}

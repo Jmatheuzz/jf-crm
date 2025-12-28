@@ -209,7 +209,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                 </CardContent>
                             </Card>
                             {
-                                localStorage.getItem('role') === 'ATENDIMENTO' && (
+                                ['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
                                     <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
                                         <Button
                                             variant="contained"
