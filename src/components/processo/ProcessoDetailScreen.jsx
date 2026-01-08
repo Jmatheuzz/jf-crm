@@ -2,6 +2,7 @@
 import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
 import LockClockOutlined from "@mui/icons-material/LockClockOutlined";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // Componentes do MUI (cada um separado)
 import AppBar from "@mui/material/AppBar";
@@ -16,6 +17,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import { Button, IconButton, Paper } from "@mui/material";
+
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,11 +28,10 @@ import UsuarioModal from "../UsuarioModal";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Button } from "@mui/material";
 
 const ProcessoTask = ({ label, status, isAtual }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
-    
+
     return (
         <ListItem disablePadding sx={{ py: 0.5 }}>
             <Grid container alignItems="center">
@@ -56,6 +58,9 @@ export const ProcessoDetailScreen = ({ processo }) => {
     const [correspondenteBancarioChanged, setCorrespondeBancarioChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [documentos, setDocumentos] = useState([]);
+
 
     const navigate = useNavigate()
 
@@ -64,6 +69,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
             try {
                 const { data } = await apiBase.get(`/processos/${id}`);
                 setData(data);
+                setDocumentos(data.documentos || []);
                 setObservacao(data.processo.observacao || '');
                 setCorrespondeBancario(data.processo.correspondenteBancario || '');
             } finally {
@@ -71,7 +77,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
             }
         }
         getData()
-    }, [])
+    }, [id])
 
     async function proximaEtapa() {
         try {
@@ -123,10 +129,48 @@ export const ProcessoDetailScreen = ({ processo }) => {
         }
     }
 
+    const handleFileSelect = (event) => {
+        setSelectedFiles([...selectedFiles, ...Array.from(event.target.files)]);
+    };
+
+    const handleRemoveFile = (fileName) => {
+        setSelectedFiles(selectedFiles.filter(file => file.name !== fileName));
+    };
+
+    const handleUpload = async () => {
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+            formData.append('documentos[]', file);
+        });
+
+        try {
+            const { data } = await apiBase.post(`/processos/${id}/documentos`, formData);
+            setDocumentos([...documentos, ...data]);
+            setSelectedFiles([]);
+        } catch (error) {
+            console.error('Error uploading files:', error);
+        } finally {
+            window.location.reload();
+        }
+    };
+
+    const handleDelete = async (docId) => {
+        const docToDelete = documentos.find(d => d.id === docId);
+        if (docToDelete && docToDelete.id) { // Salvo no servidor
+            try {
+                await apiBase.delete(`/documentos/${docId}`);
+                setDocumentos(documentos.filter(d => d.id !== docId));
+            } catch (error) {
+                console.error('Error deleting file from server:', error);
+            }
+        }
+    };
+
+
     const handlePdfExport = () => {
         const doc = new jsPDF();
         doc.text(`Resumo do Processo N°: ${data.processo.id}`, 14, 16);
-    
+
         const processoInfo = [
             ["Cliente", data.processo.cliente.name],
             ["Corretor", data.processo.corretor.name],
@@ -152,10 +196,10 @@ export const ProcessoDetailScreen = ({ processo }) => {
             theme: 'striped',
             headStyles: { fillColor: [0, 92, 92] },
         });
-    
+
         if (data.timeline && data.timeline.length > 0) {
             const tableBody = data.timeline.map(etapa => [etapa.descricao, etapa.status]);
-    
+
             autoTable(doc, {
                 startY: doc.lastAutoTable.finalY + 10,
                 head: [['Etapa', 'Status']],
@@ -164,7 +208,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                 headStyles: { fillColor: [0, 92, 92] },
             });
         }
-    
+
         doc.save(`processo-${data.processo.id}.pdf`);
     };
 
@@ -265,7 +309,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                     <CardContent>
                         <List disablePadding>
                             {data.timeline && data.timeline.map((etapa, index) => (
-                                <ProcessoTask key={index} label={etapa.descricao} status={etapa.status} isAtual={etapa.chave === data.processo.etapa}/>
+                                <ProcessoTask key={index} label={etapa.descricao} status={etapa.status} isAtual={etapa.chave === data.processo.etapa} />
                             ))}
                         </List>
                     </CardContent>
@@ -370,6 +414,74 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         </Card>
                     )
                 }
+                {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                    <Card sx={{ mt: 3, p: 2 }}>
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            Documentos do Processo
+                        </Typography>
+
+                        <Button
+                            variant="contained"
+                            component="label"
+                        >
+                            Selecionar Arquivos
+                            <input
+                                type="file"
+                                hidden
+                                multiple
+                                onChange={handleFileSelect}
+                            />
+                        </Button>
+
+                        {selectedFiles.length > 0 && (
+                            <Paper sx={{ mt: 2, p: 1 }}>
+                                <Typography variant="subtitle2">Arquivos selecionados:</Typography>
+                                <List dense>
+                                    {selectedFiles.map((file, index) => (
+                                        <ListItem
+                                            key={index}
+                                            secondaryAction={
+                                                <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveFile(file.name)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            }
+                                        >
+                                            <ListItemText primary={file.name} />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    sx={{ mt: 1 }}
+                                    onClick={handleUpload}
+                                >
+                                    Fazer Upload
+                                </Button>
+                            </Paper>
+                        )}
+
+                        {documentos.length > 0 && (
+                            <Paper sx={{ mt: 2, p: 1 }}>
+                                <Typography variant="subtitle2">Documentos existentes:</Typography>
+                                <List dense>
+                                    {documentos.map((doc) => (
+                                        <ListItem
+                                            key={doc.id}
+                                            secondaryAction={
+                                                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(doc.id)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            }
+                                        >
+                                            <ListItemText primary={<a href={doc.url} target="_blank" rel="noopener noreferrer">{doc.nome_original}</a>} />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            </Paper>
+                        )}
+                    </Card>
+                )}
                 {isEditModalOpen && (
                     <UsuarioModal
                         usuario={editingCliente}
