@@ -79,7 +79,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
         } catch (e) {
 
         } finally {
-            //window.location.reload();
+            window.location.reload();
         }
     }
 
@@ -89,7 +89,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
         } catch (e) {
 
         } finally {
-            //window.location.reload();
+            window.location.reload();
         }
     }
 
