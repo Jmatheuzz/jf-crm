@@ -266,8 +266,11 @@ const KpiCard = ({ title, value, icon }) => (
     </Grid>
 );
 
-const FunilTable = ({ data }) => (
-    <TableContainer component={Paper} elevation={3}>
+const FunilTable = ({ data }) => {
+    const navigate = useNavigate();
+
+    return (
+        <TableContainer component={Paper} elevation={3}>
         <Table size="small">
             <TableHead>
                 <TableRow sx={{ backgroundColor: 'background.paper' }}>
@@ -277,7 +280,7 @@ const FunilTable = ({ data }) => (
             </TableHead>
             <TableBody>
                 {data.map((item, index) => (
-                    <TableRow key={index} hover>
+                    <TableRow key={index} hover onClick={() => navigate(`/processos-etapa/${item.etapa}`)}>
                         <TableCell>{item.etapa}</TableCell>
                         <TableCell align="right">{item.quantidade}</TableCell>
                     </TableRow>
@@ -285,7 +288,8 @@ const FunilTable = ({ data }) => (
             </TableBody>
         </Table>
     </TableContainer>
-);
+    )
+};
 
 const RankingTable = ({ data }) => (
     <TableContainer component={Paper} elevation={3}>
