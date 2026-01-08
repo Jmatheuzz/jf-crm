@@ -35,7 +35,7 @@ export default function Dashboard() {
     const fetchData = async (endpoint) => {
         try {
             const { data, status } = await apiBase.get(`${endpoint}`);
-            
+
             return data;
         } finally {
 
@@ -119,128 +119,128 @@ export default function Dashboard() {
             <AppBar position="static" color="transparent" elevation={0}>
                 <Toolbar sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
                     <SideMenu sx={{ mr: 2 }} /> {/* Add SideMenu here */}
-                    <img src={logo} alt="logo" style={{ width: '150px'}} />
+                    <img src={logo} alt="logo" style={{ width: '150px' }} />
                     <Typography variant="subtitle1" color="text.secondary" sx={{ ml: 'auto' }}>
                         Olá, {localStorage.getItem('name')}
                     </Typography>
                 </Toolbar>
             </AppBar>
-            <Container sx={{py: 1}}>
+            <Container sx={{ py: 1 }}>
                 <Button
-                variant="contained"
-                size="large"
-                sx={{ mt: 3, mb: 2, mr: 2 }}
-                onClick={() => navigate('/gerenciar-imovel')} // Simula login
-            >
-                Gerenciar imóveis
-            </Button>
-            <Button
-                variant="contained"
-                size="large"
-                sx={{ mt: 3, mb: 2 }}
-                onClick={() => navigate('/gerenciar-user')} // Simula login
-            >
-                Gerenciar usuários
-            </Button>
-            <Button variant="contained"
+                    variant="contained"
+                    size="large"
+                    sx={{ mt: 3, mb: 2, mr: 2 }}
+                    onClick={() => navigate('/gerenciar-imovel')} // Simula login
+                >
+                    Gerenciar imóveis
+                </Button>
+                <Button
+                    variant="contained"
+                    size="large"
+                    sx={{ mt: 3, mb: 2 }}
+                    onClick={() => navigate('/gerenciar-user')} // Simula login
+                >
+                    Gerenciar usuários
+                </Button>
+                <Button variant="contained"
 
-                size="large"
-                sx={{ mt: 3, mb: 2, ml: 2 }}
-                onClick={() => navigate('/gerenciar-processo')}>
-                Gerenciar processos habitacionais
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/gerenciar-processo')}>
+                    Gerenciar processos habitacionais
 
-            </Button>
-            <Button variant="contained"
+                </Button>
+                <Button variant="contained"
 
-                size="large"
-                sx={{ mt: 3, mb: 2, ml: 2 }}
-                onClick={() => navigate('/gerenciar-atendimento')}>
-                Gerenciar atendimentos
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/gerenciar-atendimento')}>
+                    Gerenciar atendimentos
 
-            </Button>
-            <Button variant="contained"
+                </Button>
+                <Button variant="contained"
 
-                size="large"
-                sx={{ mt: 3, mb: 2, ml: 2 }}
-                onClick={() => navigate('/esteira-atendimentos')}>
-                Esteira de atendimentos iniciais
-            </Button>
-            <Button variant="contained"
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/esteira-atendimentos')}>
+                    Esteira de atendimentos iniciais
+                </Button>
+                <Button variant="contained"
 
-                size="large"
-                sx={{ mt: 3, mb: 2, ml: 2 }}
-                onClick={() => navigate('/esteira-processos')}>
-                Esteira de processos habitacionais
-            </Button>
-            <Button variant="contained"
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/esteira-processos')}>
+                    Esteira de processos habitacionais
+                </Button>
+                <Button variant="contained"
 
-                size="large"
-                sx={{ mt: 3, mb: 2, ml: 2 }}
-                onClick={() => navigate('/comissoes')}>
-                Comissões
-            </Button>
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/comissoes')}>
+                    Comissões
+                </Button>
 
-            {/* SEÇÃO 1: KPIs (4 Cartões de Destaque) */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <KpiCard
-                    title="Taxa de Conversão"
-                    value={`${(kpis.taxaConversao * 100).toFixed(2)}%`}
-                    icon={<TrendingUpIcon />}
-                />
-                <KpiCard
-                    title="Total de Clientes"
-                    value={kpis.totalClientes}
-                    icon={<PeopleIcon />}
-                />
-                <KpiCard
-                    title="Tempo Médio do Ciclo"
-                    value={kpis.tempoMedio ? `${kpis.tempoMedio.toFixed(1)} dias` : '0 dias'}
-                    icon={<SpeedIcon />}
-                />
-                <KpiCard
-                    title="Total de Processos Ativos"
-                    value={funilData.reduce((acc, curr) => acc + curr.quantidade, 0)}
-                    icon={<AccountTreeIcon />}
-                />
-            </Grid>
-
-            <Grid container spacing={3}>
-                {/* FUNIL POR ETAPA (Esquerda - 40%) */}
-                <Grid item xs={12} md={5}>
-                    <Card elevation={3}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                📊 Funil de Processos (Etapas)
-                            </Typography>
-                            <FunilTable data={funilData} />
-                        </CardContent>
-                    </Card>
+                {/* SEÇÃO 1: KPIs (4 Cartões de Destaque) */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                    <KpiCard
+                        title="Taxa de Conversão"
+                        value={`${(kpis.taxaConversao * 100).toFixed(2)}%`}
+                        icon={<TrendingUpIcon />}
+                    />
+                    <KpiCard
+                        title="Total de Clientes"
+                        value={kpis.totalClientes}
+                        icon={<PeopleIcon />}
+                    />
+                    <KpiCard
+                        title="Tempo Médio do Ciclo"
+                        value={kpis.tempoMedio ? `${kpis.tempoMedio.toFixed(1)} dias` : '0 dias'}
+                        icon={<SpeedIcon />}
+                    />
+                    <KpiCard
+                        title="Total de Processos Ativos"
+                        value={funilData.reduce((acc, curr) => acc + curr.quantidade, 0)}
+                        icon={<AccountTreeIcon />}
+                    />
                 </Grid>
 
-                {/* RANKING DE CORRETORES (Direita - 60%) */}
-                <Grid item xs={12} md={7}>
-                    <Card elevation={3}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                🥇 Ranking de Performance (Vendas)
-                            </Typography>
-                            <RankingTable data={ranking} />
-                        </CardContent>
-                    </Card>
-                </Grid>
+                <Grid container spacing={3}>
+                    {/* FUNIL POR ETAPA (Esquerda - 40%) */}
+                    <Grid item xs={12} md={5}>
+                        <Card elevation={3}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom>
+                                    📊 Funil de Processos (Etapas)
+                                </Typography>
+                                <FunilTable data={funilData} />
+                            </CardContent>
+                        </Card>
+                    </Grid>
 
-                {/* PIPELINE DETALHADO (Linha inteira) */}
-                <Grid item xs={12}>
-                    <Card elevation={3}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                📋 Pipeline Detalhado por Corretor
-                            </Typography>
-                            <PipelineList data={pipeline} />
-                        </CardContent>
-                    </Card>
+                    {/* RANKING DE CORRETORES (Direita - 60%) */}
+                    <Grid item xs={12} md={7}>
+                        <Card elevation={3}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom>
+                                    🥇 Ranking de Performance (Vendas)
+                                </Typography>
+                                <RankingTable data={ranking} />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* PIPELINE DETALHADO (Linha inteira) */}
+                    <Grid item xs={12}>
+                        <Card elevation={3}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom>
+                                    📋 Pipeline Detalhado por Corretor
+                                </Typography>
+                                <PipelineList data={pipeline} />
+                            </CardContent>
+                        </Card>
+                    </Grid>
                 </Grid>
-            </Grid>
             </Container>
         </Box>
     );
@@ -271,23 +271,23 @@ const FunilTable = ({ data }) => {
 
     return (
         <TableContainer component={Paper} elevation={3}>
-        <Table size="small">
-            <TableHead>
-                <TableRow sx={{ backgroundColor: 'background.paper' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Etapa</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Processos</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {data.map((item, index) => (
-                    <TableRow key={index} hover onClick={() => navigate(`/processos-etapa/${item.etapa}`)}>
-                        <TableCell>{item.etapa}</TableCell>
-                        <TableCell align="right">{item.quantidade}</TableCell>
+            <Table size="small">
+                <TableHead>
+                    <TableRow sx={{ backgroundColor: 'background.paper' }}>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Etapa</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Processos</TableCell>
                     </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    </TableContainer>
+                </TableHead>
+                <TableBody>
+                    {data.map((item, index) => (
+                        <TableRow key={index} hover onClick={() => navigate(`/processos-etapa/${item.etapa}`)}>
+                            <TableCell>{item.etapa}</TableCell>
+                            <TableCell align="right">{item.quantidade}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
     )
 };
 
@@ -327,23 +327,42 @@ const PipelineList = ({ data }) => {
         <Grid container spacing={3}>
             {corretoresComProcessos.map(c => (
                 <Grid item xs={12} sm={6} md={4} key={c.corretorId}>
-                    <Card sx={{bgcolor: 'background.paper'}}>
+                    <Card sx={{ bgcolor: 'background.paper' }}>
                         <CardContent sx={{ p: 1.5 }}>
                             <Typography variant="subtitle1" component="h4" color="primary.dark">
                                 {c.nomeCorretor} ({c.totalProcessosEmAndamento} Processos)
                             </Typography>
                             <Divider sx={{ my: 1 }} />
                             <List dense disablePadding>
-                                {c.processos.map(p => (
-                                    <ListItem key={p.id} sx={{ py: 0, px: 0 }}>
-                                        <ListItemText
-                                            primary={p.clienteNome || `ID: ${p.id}`}
-                                            secondary={`Etapa: ${p.etapaAtual}`}
-                                            primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9em' }}
-                                            secondaryTypographyProps={{ fontSize: '0.8em' }}
-                                        />
-                                    </ListItem>
-                                ))}
+                                {c.processos.map(p => {
+                                    if (['CONTRATO_EMPREITADA', 'CONFECCAO_PROJETO', 'APROVACAO_MUNICIPAL', 'ABERTURA_OS', 'AVALIACAO_CAIXA', 'CONFORMIDADE_PROCESSO'].includes(p.etapaEnum)) {
+                                        return (
+                                            <ListItem key={p.id} sx={{ py: 0, px: 0 }}>
+                                                <ListItemText
+                                                    primary={p.clienteNome || `ID: ${p.id}`}
+                                                    secondary={`Etapa: ${p.etapaAtual}`}
+                                                    primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9em' }}
+                                                    secondaryTypographyProps={{ fontSize: '0.8em' }}
+                                                />
+                                            </ListItem>
+                                        )
+                                    }
+                                })}
+                                <hr/>
+                                {c.processos.map(p => {
+                                    if (['ASSINATURA_CONTRATO', 'REGISTRO_CARTORIO', 'HABITISE_EMITIDO', 'AVERBACAO_OBRA', 'IMOVEL_ENTREGUE'].includes(p.etapaEnum)) {
+                                        return (
+                                            <ListItem key={p.id} sx={{ py: 0, px: 0 }}>
+                                                <ListItemText
+                                                    primary={p.clienteNome || `ID: ${p.id}`}
+                                                    secondary={`Etapa: ${p.etapaAtual}`}
+                                                    primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9em' }}
+                                                    secondaryTypographyProps={{ fontSize: '0.8em' }}
+                                                />
+                                            </ListItem>
+                                        )
+                                    }
+                                })}
                             </List>
                         </CardContent>
                     </Card>
