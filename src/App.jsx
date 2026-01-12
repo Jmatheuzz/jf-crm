@@ -24,7 +24,9 @@ import { Comissao } from './components/Comissao'
 import CriarProcesso from './pages/CriarProcesso'
 import AdminAtendimento from './pages/AdminAtendimento'
 import MyProfile from './pages/MyProfile' // Import MyProfile
-import AdminProcessoByEtapa from './pages/AdminProcessoByEtapa'
+import AdminProcessoByEtapa from './pages/AdminProcessoByEtapa';
+import ResumoCorretores from './pages/ResumoCorretores';
+import CorretorProcessos from './pages/CorretorProcessos';
 
 function App() {
 
@@ -53,6 +55,8 @@ function App() {
       <Route path="/comissoes" element={<Comissao />} />
       <Route path="/my-profile" element={<MyProfile />} />
       <Route path="/processos-etapa/:etapa" element={<AdminProcessoByEtapa />} />
+      <Route path="/resumo-corretores" element={<ResumoCorretores />} />
+      <Route path="/corretor/:userId/processos" element={<CorretorProcessos />} />
     </Routes>
   )
 }
