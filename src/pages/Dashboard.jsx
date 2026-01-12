@@ -188,6 +188,14 @@ export default function Dashboard() {
                     Relatório de Corretores
                 </Button>
 
+                <Button variant="contained"
+
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/previsao-comissoes')}>
+                    Previsão de Comissões
+                </Button>
+
                 {/* SEÇÃO 1: KPIs (4 Cartões de Destaque) */}
                 <Grid container spacing={3} sx={{ mb: 4 }}>
                     <KpiCard
