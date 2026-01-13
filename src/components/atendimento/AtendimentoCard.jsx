@@ -49,7 +49,7 @@ export default function AtendimentoCard({ atendimento, isDraggable }){
                  <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
                     <Person fontSize="small" sx={{ mr: 1 }} />
                 
-                    {localStorage.getItem('role') !== 'CLIENTE' && <Typography variant="caption">Cliente: {atendimento.cliente.name}</Typography>}
+                    {localStorage.getItem('role') !== 'CLIENTE' && <Typography variant="caption">Cliente: {atendimento?.cliente?.name}</Typography>}
                 </Box>
             </CardContent>
         </Card>
