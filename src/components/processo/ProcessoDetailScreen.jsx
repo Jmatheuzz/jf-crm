@@ -56,6 +56,8 @@ export const ProcessoDetailScreen = ({ processo }) => {
     const [observacaoChanged, setObservacaoChanged] = useState(false);
     const [correspondenteBancario, setCorrespondeBancario] = useState('');
     const [correspondenteBancarioChanged, setCorrespondeBancarioChanged] = useState(false);
+    const [dataAssinaturaEmpreitada, setDataAssinaturaEmpreitada] = useState('');
+    const [dataAssinaturaEmpreitadaChanged, setDataAssinaturaEmpreitadaChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -72,6 +74,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                 setDocumentos(data.documentos || []);
                 setObservacao(data.processo.observacao || '');
                 setCorrespondeBancario(data.processo.correspondenteBancario || '');
+                setDataAssinaturaEmpreitada(data.processo.data_assinatura_empreitada || '');
             } finally {
                 setLoading(false);
             }
@@ -126,6 +129,15 @@ export const ProcessoDetailScreen = ({ processo }) => {
             setCorrespondeBancarioChanged(false);
         } catch (error) {
             console.error('Error saving observation:', error);
+        }
+    }
+
+    async function handleSaveDataAssinaturaEmpreitada() {
+        try {
+            await apiBase.put(`/processos/${id}`, { data_assinatura_empreitada: dataAssinaturaEmpreitada });
+            setDataAssinaturaEmpreitadaChanged(false);
+        } catch (error) {
+            console.error('Error saving data_assinatura_empreitada:', error);
         }
     }
 
@@ -381,6 +393,37 @@ export const ProcessoDetailScreen = ({ processo }) => {
                                 disabled={!correspondenteBancarioChanged}
                             >
                                 Salvar Corresponde Bancário
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Data de Assinatura da Empreitada
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                type="date"
+                                value={dataAssinaturaEmpreitada}
+                                onChange={(e) => {
+                                    setDataAssinaturaEmpreitada(e.target.value);
+                                    setDataAssinaturaEmpreitadaChanged(true);
+                                }}
+                                variant="outlined"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveDataAssinaturaEmpreitada}
+                                disabled={!dataAssinaturaEmpreitadaChanged}
+                            >
+                                Salvar Data
                             </Button>
                         </Card>
                     )

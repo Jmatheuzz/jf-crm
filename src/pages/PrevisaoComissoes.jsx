@@ -98,7 +98,7 @@ export default function PrevisaoComissoes() {
                                 <ListItem key={comissao.id}>
                                     <ListItemText
                                         primary={`Corretor: ${comissao.processo_habitacional.corretor.name} - Valor: R$ ${Number(comissao.valor).toFixed(2)}`}
-                                        secondary={`Cliente: ${comissao.processo_habitacional.cliente.name} | Etapa: ${comissao.processo_habitacional.etapa} | Data da assinatura: ${new Date(comissao.processo_habitacional.data_assinatura).toLocaleDateString()}`}
+                                        secondary={`Cliente: ${comissao.processo_habitacional.cliente.name} | Etapa: ${comissao.processo_habitacional.etapa} | Data da assinatura: ${new Date(comissao.processo_habitacional.data_assinatura_empreitada + " 00:00:00").toLocaleDateString()}`}
                                     />
                                 </ListItem>
                             ))}
