@@ -14,6 +14,7 @@ export default function CriarProcesso() {
   const [selectedCorretor, setSelectedCorretor] = useState(null);
   const [selectedInteresse, setSelectedInteresse] = useState("Compra de Imóvel");
   const [correspondenteBancario, setCorrespondeBancario] = useState("");
+  const [nomeConstrutora, setNomeConstrutora] = useState("");
 
   const navigate = useNavigate()
 
@@ -49,7 +50,8 @@ export default function CriarProcesso() {
         cliente_id: selectedCliente.id,
         corretor_id: selectedCorretor.id,
         interesse: selectedInteresse,
-        correspondenteBancario: correspondenteBancario
+        correspondenteBancario: correspondenteBancario,
+        nomeConstrutora: nomeConstrutora
       })
       navigate(`/processos/${data.id}`)
     } catch (err) {
@@ -95,6 +97,13 @@ export default function CriarProcesso() {
         label="Corresponde Bancário"
         value={correspondenteBancario}
         onChange={(e) => setCorrespondeBancario(e.target.value)}
+        fullWidth
+        sx={{ mt: 2 }}
+      />
+      <TextField
+        label="Nome da Construtora"
+        value={nomeConstrutora}
+        onChange={(e) => setNomeConstrutora(e.target.value)}
         fullWidth
         sx={{ mt: 2 }}
       />

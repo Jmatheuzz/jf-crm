@@ -56,6 +56,8 @@ export const ProcessoDetailScreen = ({ processo }) => {
     const [observacaoChanged, setObservacaoChanged] = useState(false);
     const [correspondenteBancario, setCorrespondeBancario] = useState('');
     const [correspondenteBancarioChanged, setCorrespondeBancarioChanged] = useState(false);
+    const [nomeConstrutora, setNomeConstrutora] = useState('');
+    const [nomeConstrutoraChanged, setNomeConstrutoraChanged] = useState(false);
     const [dataAssinaturaEmpreitada, setDataAssinaturaEmpreitada] = useState('');
     const [dataAssinaturaEmpreitadaChanged, setDataAssinaturaEmpreitadaChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -74,6 +76,7 @@ export const ProcessoDetailScreen = ({ processo }) => {
                 setDocumentos(data.documentos || []);
                 setObservacao(data.processo.observacao || '');
                 setCorrespondeBancario(data.processo.correspondenteBancario || '');
+                setNomeConstrutora(data.processo.nomeConstrutora || '');
                 setDataAssinaturaEmpreitada(data.processo.data_assinatura_empreitada || '');
             } finally {
                 setLoading(false);
@@ -129,6 +132,15 @@ export const ProcessoDetailScreen = ({ processo }) => {
             setCorrespondeBancarioChanged(false);
         } catch (error) {
             console.error('Error saving observation:', error);
+        }
+    }
+
+    async function handleSaveNomeConstrutora() {
+        try {
+            await apiBase.put(`/processos/${id}`, { nomeConstrutora });
+            setNomeConstrutoraChanged(false);
+        } catch (error) {
+            console.error('Error saving nomeConstrutora:', error);
         }
     }
 
@@ -191,6 +203,10 @@ export const ProcessoDetailScreen = ({ processo }) => {
 
         if (data.processo.correspondenteBancario) {
             processoInfo.push(["Corresponde Bancário", data.processo.correspondenteBancario]);
+        }
+
+        if (data.processo.nomeConstrutora) {
+            processoInfo.push(["Nome Construtora", data.processo.nomeConstrutora]);
         }
 
         if (data.processo.imovel) {
@@ -284,6 +300,11 @@ export const ProcessoDetailScreen = ({ processo }) => {
                         {data.processo.correspondenteBancario && (
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                 Corresponde Bancário: {data.processo.correspondenteBancario}
+                            </Typography>
+                        )}
+                        {data.processo.nomeConstrutora && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Nome da Construtora: {data.processo.nomeConstrutora}
                             </Typography>
                         )}
                         {
@@ -393,6 +414,35 @@ export const ProcessoDetailScreen = ({ processo }) => {
                                 disabled={!correspondenteBancarioChanged}
                             >
                                 Salvar Corresponde Bancário
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    localStorage.getItem('role') === 'ADMIN' && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Nome da Construtora
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={1}
+                                value={nomeConstrutora}
+                                onChange={(e) => {
+                                    setNomeConstrutora(e.target.value);
+                                    setNomeConstrutoraChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveNomeConstrutora}
+                                disabled={!nomeConstrutoraChanged}
+                            >
+                                Salvar Nome da Construtora
                             </Button>
                         </Card>
                     )
