@@ -80,7 +80,7 @@ export default function Home() {
 
             {tabValue === 0 && (
                 <Container sx={{ py: 2 }}>
-                    {['ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                    {['ATENDIMENTO', 'CORRETOR'].includes(localStorage.getItem('role')) && (
                         <Button variant="contained"
                             
                             size="large"
