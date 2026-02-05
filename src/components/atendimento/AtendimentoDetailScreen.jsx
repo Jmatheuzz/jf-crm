@@ -49,6 +49,8 @@ export const AtendimentoDetailScreen = ({ processo }) => {
     const [selectedImovel, setSelectedImovel] = useState(null);
     const [observacao, setObservacao] = useState('');
     const [observacaoChanged, setObservacaoChanged] = useState(false);
+    const [motivoCancelamento, setMotivoCancelamento] = useState('');
+    const [motivoCancelamentoChanged, setMotivoCancelamentoChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
 
@@ -61,6 +63,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
             
                 setData(data);
                 setObservacao(data.processo.observacao || '');
+                setMotivoCancelamento(data.processo.motivoCancelamento || '');
             } finally {
                 setLoading(false);
             }
@@ -106,6 +109,17 @@ export const AtendimentoDetailScreen = ({ processo }) => {
             setObservacaoChanged(false);
         } catch (error) {
             console.error('Error saving observation:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleSaveMotivoCancelamento() {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { motivoCancelamento });
+            setMotivoCancelamentoChanged(false);
+        } catch (error) {
+            console.error('Error saving motivoCancelamento:', error);
         } finally {
             window.location.reload();
         }
@@ -178,6 +192,11 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                         {data.processo.interesse}
                                     </Typography>
+                                    {!data.processo.is_active && data.processo.motivoCancelamento && (
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                                            Motivo do Cancelamento: {data.processo.motivoCancelamento}
+                                        </Typography>
+                                    )}
                                     {
                                         data.processo?.imovel?.id && (
                                             (
@@ -274,6 +293,35 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                             onClick={() => handleActive(!data.processo.is_active)}
                                         >
                                             {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
+                                        </Button>
+                                    </Card>
+                                )
+                            }
+                            {
+                                ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && !data.processo.is_active && (
+                                    <Card sx={{ mt: 3, p: 2 }}>
+                                        <Typography variant="h6" sx={{ mb: 2 }}>
+                                            Motivo do Cancelamento
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={4}
+                                            value={motivoCancelamento}
+                                            onChange={(e) => {
+                                                setMotivoCancelamento(e.target.value);
+                                                setMotivoCancelamentoChanged(true);
+                                            }}
+                                            variant="outlined"
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            size="large"
+                                            sx={{ mt: 2 }}
+                                            onClick={handleSaveMotivoCancelamento}
+                                            disabled={!motivoCancelamentoChanged}
+                                        >
+                                            Salvar Motivo do Cancelamento
                                         </Button>
                                     </Card>
                                 )
