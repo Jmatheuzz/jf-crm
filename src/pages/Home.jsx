@@ -90,7 +90,7 @@ export default function Home() {
 
                             </Button>
                     )}
-                    {['ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                    {['ATENDIMENTO', 'CORRETOR'].includes(localStorage.getItem('role')) && (
                         <Button
                                         variant="contained"
                                         size="large"
