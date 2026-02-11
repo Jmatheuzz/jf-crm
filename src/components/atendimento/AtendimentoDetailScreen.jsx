@@ -57,6 +57,10 @@ export const AtendimentoDetailScreen = ({ processo }) => {
     const [observacaoChanged, setObservacaoChanged] = useState(false);
     const [motivoCancelamento, setMotivoCancelamento] = useState('');
     const [motivoCancelamentoChanged, setMotivoCancelamentoChanged] = useState(false);
+    const [valorSimulacao, setValorSimulacao] = useState('');
+    const [valorSimulacaoChanged, setValorSimulacaoChanged] = useState(false);
+    const [dataSimulacao, setDataSimulacao] = useState('');
+    const [dataSimulacaoChanged, setDataSimulacaoChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
     const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
@@ -72,6 +76,8 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                 setData(data);
                 setObservacao(data.processo.observacao || '');
                 setMotivoCancelamento(data.processo.motivoCancelamento || '');
+                setValorSimulacao(data.processo.valor_simulacao || '');
+                setDataSimulacao(data.processo.data_simulacao || '');
             } finally {
                 setLoading(false);
             }
@@ -133,6 +139,28 @@ export const AtendimentoDetailScreen = ({ processo }) => {
             setMotivoCancelamentoChanged(false);
         } catch (error) {
             console.error('Error saving motivoCancelamento:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleSaveValorSimulacao() {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { valor_simulacao: valorSimulacao });
+            setValorSimulacaoChanged(false);
+        } catch (error) {
+            console.error('Error saving valorSimulacao:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleSaveDataSimulacao() {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { data_simulacao: dataSimulacao });
+            setDataSimulacaoChanged(false);
+        } catch (error) {
+            console.error('Error saving dataSimulacao:', error);
         } finally {
             window.location.reload();
         }
@@ -205,12 +233,21 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {data.processo.interesse}
                         </Typography>
+                        {data.processo.valor_simulacao && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Valor da Simulação: R$ {Number(data.processo.valor_simulacao).toFixed(2)}
+                            </Typography>
+                        )}
+                        {data.processo.data_simulacao && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Data da Simulacao: {new Date(data.processo.data_simulacao + " 00:00:00").toLocaleDateString()}
+                            </Typography>
+                        )}
                         {!data.processo.is_active && data.processo.motivoCancelamento && (
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'error.main' }}>
                                 Motivo do Cancelamento: {data.processo.motivoCancelamento}
                             </Typography>
-                        )}
-                        {
+                        )}                        {
                             data.processo?.imovel?.id && (
                                 (
                                     <>
@@ -339,6 +376,65 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                         </Card>
                     )
                 }
+                {
+                    ['CORRETOR', 'ATENDIMENTO','ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Valor da Simulação
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                value={valorSimulacao}
+                                onChange={(e) => {
+                                    setValorSimulacao(e.target.value);
+                                    setValorSimulacaoChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveValorSimulacao}
+                                disabled={!valorSimulacaoChanged}
+                            >
+                                Salvar Valor da Simulação
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Data da simulação
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                type="date"
+                                value={dataSimulacao}
+                                onChange={(e) => {
+                                    setDataSimulacao(e.target.value);
+                                    setDataSimulacaoChanged(true);
+                                }}
+                                variant="outlined"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveDataSimulacao}
+                                disabled={!dataSimulacaoChanged}
+                            >
+                                Salvar Data da simulação
+                            </Button>
+                        </Card>
+                    )
+                }
                 {isEditModalOpen && (
                     <UsuarioModal
                         usuario={editingCliente}
@@ -348,8 +444,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                             window.location.reload();
                         }}
                     />
-                )}
-                <Dialog open={isSimulationModalOpen} onClose={() => setIsSimulationModalOpen(false)}>
+                )}                <Dialog open={isSimulationModalOpen} onClose={() => setIsSimulationModalOpen(false)}>
                     <DialogTitle>Valor da Simulação</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
