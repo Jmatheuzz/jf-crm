@@ -28,6 +28,7 @@ import AdminProcessoByEtapa from './pages/AdminProcessoByEtapa';
 import ResumoCorretores from './pages/ResumoCorretores';
 import CorretorProcessos from './pages/CorretorProcessos';
 import PrevisaoComissoes from './pages/PrevisaoComissoes';
+import PrevisaoFaturamento from './pages/PrevisaoFaturamento';
 
 function App() {
 
@@ -59,6 +60,7 @@ function App() {
       <Route path="/resumo-corretores" element={<ResumoCorretores />} />
       <Route path="/corretor/:userId/processos" element={<CorretorProcessos />} />
       <Route path="/previsao-comissoes" element={<PrevisaoComissoes />} />
+      <Route path="/previsao-faturamento" element={<PrevisaoFaturamento />} />
     </Routes>
   )
 }

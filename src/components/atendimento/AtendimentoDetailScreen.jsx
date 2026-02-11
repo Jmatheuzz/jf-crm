@@ -16,6 +16,11 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,6 +28,7 @@ import { apiBase } from "../../network/api";
 import Button from "@mui/material/Button";
 import FindImovel from "../FindImovel";
 import UsuarioModal from "../UsuarioModal";
+import { formatToBRL, removeMask } from "../../utils";
 
 const AtendimentoTask = ({ label, status }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
@@ -53,6 +59,8 @@ export const AtendimentoDetailScreen = ({ processo }) => {
     const [motivoCancelamentoChanged, setMotivoCancelamentoChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
+    const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
+    const [simulationValue, setSimulationValue] = useState('');
 
     const navigate = useNavigate()
 
@@ -60,7 +68,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
         async function getData() {
             try {
                 const { data } = await apiBase.get(`/atendimentos/${id}`);
-            
+
                 setData(data);
                 setObservacao(data.processo.observacao || '');
                 setMotivoCancelamento(data.processo.motivoCancelamento || '');
@@ -71,9 +79,14 @@ export const AtendimentoDetailScreen = ({ processo }) => {
         getData()
     }, [])
 
-    async function proximaEtapa() {
+    async function proximaEtapa(valorSimulacao = null) {
+        if (data.processo.etapa === 'SIMULACAO' && valorSimulacao === null) {
+            setIsSimulationModalOpen(true);
+            return;
+        }
+
         try {
-            await apiBase.post(`/atendimentos/${id}/proxima-etapa`)
+            await apiBase.post(`/atendimentos/${id}/proxima-etapa`, { valor_simulacao: valorSimulacao });
         } catch (e) {
 
         } finally {
@@ -154,189 +167,211 @@ export const AtendimentoDetailScreen = ({ processo }) => {
         <Box sx={{ height: '100vh', bgcolor: 'background.default' }}>
             <AppBar position="static" color="primary" elevation={0}>
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1, color: data.processo.is_active ?'white': 'red'}}>
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: data.processo.is_active ? 'white' : 'red' }}>
                         Atendimento {data.processo.id} {data.processo.is_active ? '' : '(Encerrado)'}
                     </Typography>
                 </Toolbar>
             </AppBar>
 
-            		<Container sx={{ py: 3 }}>
-                            {/* INFORMAÇÕES DO CORRETOR */}
-                            <Card elevation={2} sx={{ mb: 3 }}>
-                                <CardContent sx={{ pb: 1 }}>
-                                    {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                                            Cliente: {data.processo.cliente.name}
-                                                                            {
-                                                                                localStorage.getItem('role') === 'CORRETOR' &&
-                                                                                <Button
-                                                                                    variant="contained"
-                                                                                    size="small"
-                                                                                    sx={{ ml: 2 }}
-                                                                                    onClick={() => {
-                                                                                        setEditingCliente(data.processo.cliente)
-                                                                                        setIsEditModalOpen(true)
-                                                                                    }}
-                                                                                >
-                                                                                    Editar Cliente
-                                                                                </Button>
-                                                                            }
-                                                                        </Typography>)}                                    {['ADMIN', 'ATENDIMENTO', 'CLIENTE'].includes(localStorage.getItem('role')) && (
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                            Corretor: {data.processo.corretor.name}
-                                        </Typography>)}
-                                    {localStorage.getItem('role') === 'CLIENTE' && (
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                            Whatsapp: {data.processo.corretor.telefone}
-                                        </Typography>)}
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                        {data.processo.interesse}
-                                    </Typography>
-                                    {!data.processo.is_active && data.processo.motivoCancelamento && (
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                                            Motivo do Cancelamento: {data.processo.motivoCancelamento}
-                                        </Typography>
-                                    )}
-                                    {
-                                        data.processo?.imovel?.id && (
-                                            (
-                                                <>
-                                                    <Typography variant="subtitle1">
-                                                        Endereço: {data.processo.imovel.endereco}
-                                                    </Typography>
-                                                    <Typography variant="subtitle1">
-                                                        Valor: R$ {data.processo.imovel.valor}
-                                                    </Typography>
-                                                </>
-                                            )
-                                        )
-                                    }
-            
-                                </CardContent>
-                            </Card>
-            
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
-                                Etapas
+            <Container sx={{ py: 3 }}>
+                {/* INFORMAÇÕES DO CORRETOR */}
+                <Card elevation={2} sx={{ mb: 3 }}>
+                    <CardContent sx={{ pb: 1 }}>
+                        {['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Cliente: {data.processo.cliente.name}
+                                {
+                                    localStorage.getItem('role') === 'CORRETOR' &&
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                        onClick={() => {
+                                            setEditingCliente(data.processo.cliente)
+                                            setIsEditModalOpen(true)
+                                        }}
+                                    >
+                                        Editar Cliente
+                                    </Button>
+                                }
+                            </Typography>)}                                    {['ADMIN', 'ATENDIMENTO', 'CLIENTE'].includes(localStorage.getItem('role')) && (
+                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                    Corretor: {data.processo.corretor.name}
+                                </Typography>)}
+                        {localStorage.getItem('role') === 'CLIENTE' && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Whatsapp: {data.processo.corretor.telefone}
+                            </Typography>)}
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                            {data.processo.interesse}
+                        </Typography>
+                        {!data.processo.is_active && data.processo.motivoCancelamento && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                                Motivo do Cancelamento: {data.processo.motivoCancelamento}
                             </Typography>
-                            <Card elevation={2} sx={{ mb: 3 }}>
-                                <CardContent>
-                                    <List disablePadding>
-                                        {data.timeline && data.timeline.map((etapa, index) => (
-                                            <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
-                                        ))}
-                                    </List>
-                                </CardContent>
-                            </Card>
-                            {
-                                ['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
-                                    <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                                        <Button
-                                            variant="contained"
-            
-                                            size="large"
-                                            sx={{ mt: 3, mb: 2 }}
-                                            onClick={() => etapaAnterior()} // Simula criação e avança
-                                        >Anterior</Button>
-            
-                                        {
-                                            selectedImovel && (
-                                                <Button
-                                                    variant="contained"
-            
-                                                    size="large"
-                                                    sx={{ mt: 3, mb: 2 }}
-                                                    onClick={() => adicionarImovel()} // Simula criação e avança
-                                                >Salvar imóvel</Button>
-                                            )
-                                        }
-            
-                                        <Button
-                                            variant="contained"
-            
-                                            size="large"
-                                            sx={{ mt: 3, mb: 2 }}
-                                            onClick={() => proximaEtapa()} // Simula criação e avança
-                                        >Proximo</Button>
-                                    </Card>
-                                )
-                            }
-                            {
-                                ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
-                                    <Card sx={{ mt: 3, p: 2 }}>
-                                        <Typography variant="h6" sx={{ mb: 2 }}>
-                                            Observação do Processo
+                        )}
+                        {
+                            data.processo?.imovel?.id && (
+                                (
+                                    <>
+                                        <Typography variant="subtitle1">
+                                            Endereço: {data.processo.imovel.endereco}
                                         </Typography>
-                                        <TextField
-                                            fullWidth
-                                            multiline
-                                            rows={4}
-                                            value={observacao}
-                                            onChange={(e) => {
-                                                setObservacao(e.target.value);
-                                                setObservacaoChanged(true);
-                                            }}
-                                            variant="outlined"
-                                        />
-                                        <Button
-                                            variant="contained"
-                                            size="large"
-                                            sx={{ mt: 2 }}
-                                            onClick={handleSaveObservacao}
-                                            disabled={!observacaoChanged}
-                                        >
-                                            Salvar Observação
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            size="large"
-                                            sx={{ mt: 2, ml: 2 }}
-                                            onClick={() => handleActive(!data.processo.is_active)}
-                                        >
-                                            {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
-                                        </Button>
-                                    </Card>
-                                )
-                            }
-                            {
-                                ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && !data.processo.is_active && (
-                                    <Card sx={{ mt: 3, p: 2 }}>
-                                        <Typography variant="h6" sx={{ mb: 2 }}>
-                                            Motivo do Cancelamento
+                                        <Typography variant="subtitle1">
+                                            Valor: R$ {data.processo.imovel.valor}
                                         </Typography>
-                                        <TextField
-                                            fullWidth
-                                            multiline
-                                            rows={4}
-                                            value={motivoCancelamento}
-                                            onChange={(e) => {
-                                                setMotivoCancelamento(e.target.value);
-                                                setMotivoCancelamentoChanged(true);
-                                            }}
-                                            variant="outlined"
-                                        />
-                                        <Button
-                                            variant="contained"
-                                            size="large"
-                                            sx={{ mt: 2 }}
-                                            onClick={handleSaveMotivoCancelamento}
-                                            disabled={!motivoCancelamentoChanged}
-                                        >
-                                            Salvar Motivo do Cancelamento
-                                        </Button>
-                                    </Card>
+                                    </>
+                                )
+                            )
+                        }
+
+                    </CardContent>
+                </Card>
+
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
+                    Etapas
+                </Typography>
+                <Card elevation={2} sx={{ mb: 3 }}>
+                    <CardContent>
+                        <List disablePadding>
+                            {data.timeline && data.timeline.map((etapa, index) => (
+                                <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
+                            ))}
+                        </List>
+                    </CardContent>
+                </Card>
+                {
+                    ['CORRETOR', 'ADMIN', 'ATENDIMENTO'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                            <Button
+                                variant="contained"
+
+                                size="large"
+                                sx={{ mt: 3, mb: 2 }}
+                                onClick={() => etapaAnterior()} // Simula criação e avança
+                            >Anterior</Button>
+
+                            {
+                                selectedImovel && (
+                                    <Button
+                                        variant="contained"
+
+                                        size="large"
+                                        sx={{ mt: 3, mb: 2 }}
+                                        onClick={() => adicionarImovel()} // Simula criação e avança
+                                    >Salvar imóvel</Button>
                                 )
                             }
-                             {isEditModalOpen && (
-                                <UsuarioModal
-                                    usuario={editingCliente}
-                                    onClose={() => setIsEditModalOpen(false)}
-                                    onSuccess={() => {
-                                        setIsEditModalOpen(false);
-                                        window.location.reload();
-                                    }}
-                                />
-                            )}
-                        </Container>        </Box>
+
+                            <Button
+                                variant="contained"
+
+                                size="large"
+                                sx={{ mt: 3, mb: 2 }}
+                                onClick={() => proximaEtapa()} // Simula criação e avança
+                            >Proximo</Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Observação do Processo
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                value={observacao}
+                                onChange={(e) => {
+                                    setObservacao(e.target.value);
+                                    setObservacaoChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveObservacao}
+                                disabled={!observacaoChanged}
+                            >
+                                Salvar Observação
+                            </Button>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2, ml: 2 }}
+                                onClick={() => handleActive(!data.processo.is_active)}
+                            >
+                                {data.processo.is_active ? 'Encerrar Atendimento' : 'Ativar Atendimento'}
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && !data.processo.is_active && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Motivo do Cancelamento
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                value={motivoCancelamento}
+                                onChange={(e) => {
+                                    setMotivoCancelamento(e.target.value);
+                                    setMotivoCancelamentoChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveMotivoCancelamento}
+                                disabled={!motivoCancelamentoChanged}
+                            >
+                                Salvar Motivo do Cancelamento
+                            </Button>
+                        </Card>
+                    )
+                }
+                {isEditModalOpen && (
+                    <UsuarioModal
+                        usuario={editingCliente}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onSuccess={() => {
+                            setIsEditModalOpen(false);
+                            window.location.reload();
+                        }}
+                    />
+                )}
+                <Dialog open={isSimulationModalOpen} onClose={() => setIsSimulationModalOpen(false)}>
+                    <DialogTitle>Valor da Simulação</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Por favor, insira o valor da simulação para avançar.
+                        </DialogContentText>
+                        <input
+                            type="text"
+                            value={formatToBRL(simulationValue)}
+                            onChange={(e) => {
+                                const valorFormatado = e.target.value;
+                                const valorNumerico = removeMask(valorFormatado);
+                                setSimulationValue(valorNumerico);
+                            }}
+                            className="w-full pl-10 pr-4 py-3 bg-background-paper border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-main focus:border-transparent outline-none"
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setIsSimulationModalOpen(false)}>Cancelar</Button>
+                        <Button onClick={() => proximaEtapa(simulationValue)}>Confirmar</Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>        </Box>
     )
 };
 

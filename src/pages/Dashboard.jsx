@@ -29,6 +29,8 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Tab, Tabs, Toolbar } from '@mui/material';
 import SideMenu from '../components/SideMenu';
 import logo from '../assets/imgs/logo-1.png';
+import PrevisaoFaturamento from './PrevisaoFaturamento';
+import { formatToBRL } from '../utils';
 // --- Componente Principal ---
 export default function Dashboard() {
     // Função genérica para buscar dados
@@ -59,6 +61,7 @@ export default function Dashboard() {
     const fetchPipelineCorretores = () => {
         return fetchData('/pipeline-corretores');
     };
+
     const [kpis, setKpis] = useState({});
     const [ranking, setRanking] = useState([]);
     const [pipeline, setPipeline] = useState([]);
@@ -69,11 +72,12 @@ export default function Dashboard() {
     useEffect(() => {
         const loadData = async () => {
             // Lógica de busca de dados (mantida de src/Dashboard.jsx anterior)
-            const [taxaConversao, totalClientes, funil, tempoMedio] = await Promise.all([
+            const [taxaConversao, totalClientes, funil, tempoMedio, previsaoFaturamento] = await Promise.all([
                 fetchMetricaSimples('/taxa-conversao'),
                 fetchMetricaSimples('/quantidade-clientes'),
                 fetchMetricaSimples('/quantidade-processo-por-etapa'),
                 fetchMetricaSimples('/tempo-medio-processo'),
+                fetchMetricaSimples('/faturamento-previsto-mes-atual')
             ]);
             console.log(tempoMedio);
             setKpis({
@@ -81,11 +85,12 @@ export default function Dashboard() {
                 totalClientes,
                 funil: funil || {},
                 tempoMedio,
+                previsaoFaturamento
             });
 
             const [rankingData, pipelineData] = await Promise.all([
                 fetchRankingCorretores(),
-                fetchPipelineCorretores(),
+                fetchPipelineCorretores()
             ]);
 
             setRanking(rankingData || []);
@@ -195,6 +200,13 @@ export default function Dashboard() {
                     onClick={() => navigate('/previsao-comissoes')}>
                     Previsão de Comissões
                 </Button>
+                <Button variant="contained"
+
+                    size="large"
+                    sx={{ mt: 3, mb: 2, ml: 2 }}
+                    onClick={() => navigate('/previsao-faturamento')}>
+                    Previsão de Faturamento
+                </Button>
 
                 {/* SEÇÃO 1: KPIs (4 Cartões de Destaque) */}
                 <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -211,6 +223,11 @@ export default function Dashboard() {
                     <KpiCard
                         title="Tempo Médio do Ciclo"
                         value={kpis.tempoMedio ? `${kpis.tempoMedio.toFixed(1)} dias` : '0 dias'}
+                        icon={<SpeedIcon />}
+                    />
+                    <KpiCard
+                        title="Previsão faturamento mês atual R$"
+                        value={kpis.previsaoFaturamento ? formatToBRL(kpis.previsaoFaturamento) : 'R$ 0,00'}
                         icon={<SpeedIcon />}
                     />
                     <KpiCard
@@ -265,7 +282,7 @@ export default function Dashboard() {
 // --- Componentes Auxiliares com MUI ---
 
 const KpiCard = ({ title, value, icon }) => (
-    <Grid item xs={12} sm={6} md={3}>
+    <Grid item xs={12} sm={8} md={4}>
         <Card sx={{ display: 'flex', alignItems: 'center', p: 2, height: 120, bgcolor: 'background.paper' }}>
             <Box sx={{ color: 'primary.main', mr: 2, fontSize: 40 }}>
                 {icon}

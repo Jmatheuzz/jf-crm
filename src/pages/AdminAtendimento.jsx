@@ -84,7 +84,7 @@ export default function AdminAtendimento() {
     }, [])
 
     const filteredProcessos = processos.filter((processo) => {
-        const nameMatches = processo.cliente.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const nameMatches = processo.cliente?.name.toLowerCase().includes(searchTerm.toLowerCase());
         const stageMatches = selectedStage === 'Todos' || processo.etapa === selectedStage;
         return nameMatches && stageMatches;
     });
