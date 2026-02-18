@@ -56,7 +56,9 @@ const UsuarioModal = ({ usuario, onClose, onSuccess }) => {
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error saving usuario:', error);
+      if (error.status === 422) {
+        window.showErrorModal("Email ou CPF já cadastrados.");
+      }
     } finally {
       setLoading(false);
     }
