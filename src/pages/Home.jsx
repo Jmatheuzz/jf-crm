@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import logo from '../assets/imgs/logo-1.png';
 import ProcessoCard from "../components/processo/ProcessoCard"
 import SideMenu from "../components/SideMenu" // Import SideMenu
+import { TextField } from "@mui/material"
 
 export default function Home() {
     const [atendimentos, setAtendimentos] = useState([]);
@@ -22,7 +23,7 @@ export default function Home() {
     const [visitas, setVisitas] = useState([]);
     const [tabValue, setTabValue] = useState(0);
     const [loading, setLoading] = useState(false)
-
+const [searchTerm, setSearchTerm] = useState("");
     async function getAtendimentos() {
         const { data } = await apiBase.get('/atendimentos')
         setAtendimentos(data)
@@ -55,6 +56,10 @@ export default function Home() {
         getData()
     }, [])
 
+      const filteredAtendimentos = atendimentos.filter((atendimento) =>
+    atendimento.cliente.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
     if (loading) return <Typography>Carregando...</Typography>
 
     return (
@@ -77,14 +82,26 @@ export default function Home() {
                     <Tab label="Visitas" />
                 </Tabs>
             </AppBar>
+            <Container sx={{ py: 1 }}>
+                {['ATENDIMENTO', 'CORRETOR'].includes(localStorage.getItem('role')) && (
+                <TextField
+                            label="Buscar por nome do cliente"
+                            variant="outlined"
+                            fullWidth
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            sx={{ mb: 2 }}
+                          />
+            )}
+            </Container>
 
             {tabValue === 0 && (
-                <Container sx={{ py: 2 }}>
+                <Container sx={{ py: 1 }}>
                     {['ATENDIMENTO', 'CORRETOR'].includes(localStorage.getItem('role')) && (
                         <Button variant="contained"
                             
                             size="large"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 1, mb: 2 }}
                             onClick={() => navigate('criar-atendimento')}>
                                 Criar atendimento
 
@@ -94,16 +111,16 @@ export default function Home() {
                         <Button
                                         variant="contained"
                                         size="large"
-                                        sx={{ mt: 3, mb: 2, ml: 2 }}
+                                        sx={{ mt: 1, mb: 2, ml: 2 }}
                                         onClick={() => navigate('/gerenciar-user')} // Simula login
                                     >
                                         Usuários
                                     </Button>
                     )}
-                    {atendimentos.length !== 0 && atendimentos.map((atendimento) => (
+                    {filteredAtendimentos.length !== 0 && filteredAtendimentos.map((atendimento) => (
                         <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
                     ))}
-                    {atendimentos.length === 0 && (
+                    {filteredAtendimentos.length === 0 && (
                         <Typography variant="body1" align="center" sx={{ mt: 5, color: 'text.secondary' }}>
                             Nenhum atendimento em andamento.
                         </Typography>
@@ -111,7 +128,7 @@ export default function Home() {
                 </Container>
             )}
             {tabValue === 1 && (
-                <Container sx={{ py: 2 }}>
+                <Container sx={{ py: 1 }}>
                     {processos.length !== 0 && processos.map((processo) => (
                         <ProcessoCard key={processo.id} processo={processo} onUpdateStatus={() => getProcessos()} />
                     ))}
