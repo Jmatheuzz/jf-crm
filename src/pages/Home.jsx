@@ -57,7 +57,7 @@ const [searchTerm, setSearchTerm] = useState("");
     }, [])
 
       const filteredAtendimentos = atendimentos.filter((atendimento) =>
-    atendimento.cliente.name.toLowerCase().includes(searchTerm.toLowerCase())
+    atendimento?.cliente?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
     if (loading) return <Typography>Carregando...</Typography>

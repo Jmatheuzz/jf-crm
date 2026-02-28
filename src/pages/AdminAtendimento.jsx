@@ -25,7 +25,8 @@ export default function AdminAtendimento() {
     const [visitas, setVisitas] = useState([]);
     const [tabValue, setTabValue] = useState(0);
     const [loading, setLoading] = useState(false)
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchCliente, setSearchTerm] = useState("");
+    const [searchCorretor, setSearchCorretor] = useState("");
     const [selectedStage, setSelectedStage] = useState("Todos");
 
     const stageEnum = {
@@ -84,9 +85,26 @@ export default function AdminAtendimento() {
     }, [])
 
     const filteredProcessos = processos.filter((processo) => {
-        const nameMatches = processo.cliente?.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const stageMatches = selectedStage === 'Todos' || processo.etapa === selectedStage;
-        return nameMatches && stageMatches;
+        if (searchCliente && !searchCorretor) {
+            const nameMatches = processo.cliente?.name.toLowerCase().includes(searchCliente.toLowerCase());
+            const stageMatches = selectedStage === 'Todos' || processo.etapa === selectedStage;
+            console.log(nameMatches)
+            console.log(searchCliente.toLowerCase())
+            console.log(processo.cliente?.name.toLowerCase())
+            return nameMatches && stageMatches;
+        }
+        if (!searchCliente && searchCorretor) {
+            const nameMatches = processo.corretor?.name.toLowerCase().includes(searchCorretor.toLowerCase());
+            const stageMatches = selectedStage === 'Todos' || processo.etapa === selectedStage;
+            return nameMatches && stageMatches;
+        }
+        if (searchCliente && searchCorretor) {
+            const nameMatchesCorretor = processo.corretor?.name.toLowerCase().includes(searchCorretor.toLowerCase());
+            const nameMatchesCliente = processo.cliente?.name.toLowerCase().includes(searchCliente.toLowerCase());
+            const stageMatches = selectedStage === 'Todos' || processo.etapa === selectedStage;
+            return nameMatchesCorretor && nameMatchesCliente && stageMatches;
+        }
+        return processo
     });
 
     if (loading) return <Typography>Carregando...</Typography>
@@ -117,8 +135,16 @@ export default function AdminAtendimento() {
                         label="Buscar por nome do cliente"
                         variant="outlined"
                         fullWidth
-                        value={searchTerm}
+                        value={searchCliente}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ mb: 2 }}
+                    />
+                     <TextField
+                        label="Buscar por nome do corretor"
+                        variant="outlined"
+                        fullWidth
+                        value={searchCorretor}
+                        onChange={(e) => setSearchCorretor(e.target.value)}
                         sx={{ mb: 2 }}
                     />
                     <FormControl fullWidth sx={{ mb: 2 }}>
