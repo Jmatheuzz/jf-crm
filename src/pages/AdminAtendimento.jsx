@@ -30,18 +30,14 @@ export default function AdminAtendimento() {
     const [selectedStage, setSelectedStage] = useState("Todos");
 
     const stageEnum = {
-        'COLETA_DOCUMENTACAO'   : 'Coleta de Documentação',
-        'ANALISE_CREDITO'       : 'Análise de Crédito',
-        'APROVADO'              : 'Aprovado',
-        'ENTREVISTA_GERENCIAL'  : 'Entrevista gerencial',
-        'CONTRATO_EMPREITADA'   : 'Contrato de Empreitada',
-        'CONFECCAO_PROJETO'     : 'Confecção do Projeto',
-        'ENTREGA_PREFEITURA'    : 'Entrega na Prefeitura',
-        'ANALISE_CREDITO_CAIXA' : 'Análise de Crédito Caixa',
-        'AVALIACAO_IMOVEL_CAIXA': 'Avaliação do Imóvel Caixa',
-        'ASSINATURA_CONTRATO'   : 'Assinatura do Contrato',
-        'REGISTRO_CARTORIO'     : 'Registro em Cartório',
-        'FINALIZADO'            : 'Processo Finalizado',
+        'SIMULACAO'  : 'Simulação em negociação',
+        'COLHER_DOCUMENTACAO'      : 'Aguardando documentação',
+        'ABERTURA_CONTA'             : 'Aguardando abertura de conta',
+        'CONFORMIDADE_CONTA' : 'Aguardando conformidade de conta',
+        'ANALISE_CREDITO'  : 'Aguardando análise crédito',
+        'CLIENTE_APROVADO'  : 'Cliente aprovado',
+        'AGUARDANDO_ENTREVISTA'  : 'Aguardando entrevista',
+        'ENTREVISTA_APROVADA'  : 'Entrevista aprovada',
     };
 
     const stages = [{ value: 'Todos', label: 'Todos' }, ...Object.entries(stageEnum).map(([value, label]) => ({ value, label }))];
