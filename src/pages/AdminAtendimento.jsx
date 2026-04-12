@@ -29,18 +29,15 @@ export default function AdminAtendimento() {
     const [searchCorretor, setSearchCorretor] = useState("");
     const [selectedStage, setSelectedStage] = useState("Todos");
 
-    const stageEnum = {
-        'SIMULACAO'  : 'Simulação em negociação',
-        'COLHER_DOCUMENTACAO'      : 'Aguardando documentação',
-        'ABERTURA_CONTA'             : 'Aguardando abertura de conta',
-        'CONFORMIDADE_CONTA' : 'Aguardando conformidade de conta',
-        'ANALISE_CREDITO'  : 'Aguardando análise crédito',
-        'CLIENTE_APROVADO'  : 'Cliente aprovado',
-        'AGUARDANDO_ENTREVISTA'  : 'Aguardando entrevista',
-        'ENTREVISTA_APROVADA'  : 'Entrevista aprovada',
-    };
-
-    const stages = [{ value: 'Todos', label: 'Todos' }, ...Object.entries(stageEnum).map(([value, label]) => ({ value, label }))];
+    const stages = [
+        { value: 'Todos', label: 'Todos' },
+        ...Array.from(
+            processos.reduce((map, p) => {
+                if (!map.has(p.etapa)) map.set(p.etapa, p.descricao_etapa);
+                return map;
+            }, new Map())
+        ).map(([value, label]) => ({ value, label }))
+    ];
 
     async function getProcesses() {
         const { data } = await apiBase.get('/atendimentos')

@@ -16,6 +16,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -30,7 +32,7 @@ import FindImovel from "../FindImovel";
 import UsuarioModal from "../UsuarioModal";
 import { formatToBRL, removeMask } from "../../utils";
 
-const AtendimentoTask = ({ label, status }) => {
+const AtendimentoTask = ({ label, status, isAtual }) => {
     const color = status != 'PENDENTE' ? 'primary' : 'disabled';
 
     return (
@@ -41,7 +43,8 @@ const AtendimentoTask = ({ label, status }) => {
                 </Grid>
                 <Grid item xs={2} sx={{ px: 0.5 }} textAlign="right">
                     {status == 'CONCLUIDA' && <CheckCircleOutline color={color} />}
-                    {status == 'PENDENTE' && <LockClockOutlined color={color} />}
+                    {!isAtual && status == 'PENDENTE' && <LockClockOutlined color={color} />}
+                    {isAtual && status == 'PENDENTE' && <RadioButtonUnchecked color={color} />}
                     {status == 'EM_ANDAMENTO' && <RadioButtonUnchecked color={color} />}
                 </Grid>
             </Grid>
@@ -61,6 +64,10 @@ export const AtendimentoDetailScreen = ({ processo }) => {
     const [valorSimulacaoChanged, setValorSimulacaoChanged] = useState(false);
     const [dataSimulacao, setDataSimulacao] = useState('');
     const [dataSimulacaoChanged, setDataSimulacaoChanged] = useState(false);
+    const [isCondicionado, setIsCondicionado] = useState(false);
+    const [isCondicionadoChanged, setIsCondicionadoChanged] = useState(false);
+    const [valorCondicionado, setValorCondicionado] = useState('');
+    const [valorCondicionadoChanged, setValorCondicionadoChanged] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState(null);
     const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
@@ -78,6 +85,8 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                 setMotivoCancelamento(data.processo.motivoCancelamento || '');
                 setValorSimulacao(data.processo.valor_simulacao || '');
                 setDataSimulacao(data.processo.data_simulacao || '');
+                setIsCondicionado(data.processo.is_condicionado || false);
+                setValorCondicionado(data.processo.valor_condicionado || '');
             } finally {
                 setLoading(false);
             }
@@ -96,7 +105,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
         } catch (e) {
 
         } finally {
-            window.location.reload();
+            //window.location.reload();
         }
     }
 
@@ -161,6 +170,28 @@ export const AtendimentoDetailScreen = ({ processo }) => {
             setDataSimulacaoChanged(false);
         } catch (error) {
             console.error('Error saving dataSimulacao:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleSaveIsCondicionado() {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { is_condicionado: isCondicionado });
+            setIsCondicionadoChanged(false);
+        } catch (error) {
+            console.error('Error saving isCondicionado:', error);
+        } finally {
+            window.location.reload();
+        }
+    }
+
+    async function handleSaveValorCondicionado() {
+        try {
+            await apiBase.put(`/atendimentos/${id}`, { valor_condicionado: valorCondicionado });
+            setValorCondicionadoChanged(false);
+        } catch (error) {
+            console.error('Error saving valorCondicionado:', error);
         } finally {
             window.location.reload();
         }
@@ -243,6 +274,16 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                 Data da Simulacao: {new Date(data.processo.data_simulacao + " 00:00:00").toLocaleDateString()}
                             </Typography>
                         )}
+                        {data.processo.is_condicionado && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                                Condicionado
+                            </Typography>
+                        )}
+                        {data.processo.valor_condicionado && (
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                Valor Condicionado: R$ {Number(data.processo.valor_condicionado).toFixed(2)}
+                            </Typography>
+                        )}
                         {!data.processo.is_active && data.processo.motivoCancelamento && (
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'error.main' }}>
                                 Motivo do Cancelamento: {data.processo.motivoCancelamento}
@@ -272,7 +313,7 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                     <CardContent>
                         <List disablePadding>
                             {data.timeline && data.timeline.map((etapa, index) => (
-                                <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} />
+                                <AtendimentoTask key={index} label={etapa.descricao} status={etapa.status} isAtual={etapa.chave === data.processo.etapa} />
                             ))}
                         </List>
                     </CardContent>
@@ -384,10 +425,9 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                             </Typography>
                             <TextField
                                 fullWidth
-                                type="number"
-                                value={valorSimulacao}
+                                value={formatToBRL(valorSimulacao)}
                                 onChange={(e) => {
-                                    setValorSimulacao(e.target.value);
+                                    setValorSimulacao(removeMask(e.target.value));
                                     setValorSimulacaoChanged(true);
                                 }}
                                 variant="outlined"
@@ -431,6 +471,63 @@ export const AtendimentoDetailScreen = ({ processo }) => {
                                 disabled={!dataSimulacaoChanged}
                             >
                                 Salvar Data da simulação
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Condicionado
+                            </Typography>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={isCondicionado}
+                                        onChange={(e) => {
+                                            setIsCondicionado(e.target.checked);
+                                            setIsCondicionadoChanged(true);
+                                        }}
+                                    />
+                                }
+                                label={isCondicionado ? 'Sim' : 'Não'}
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2, display: 'block' }}
+                                onClick={handleSaveIsCondicionado}
+                                disabled={!isCondicionadoChanged}
+                            >
+                                Salvar Condicionado
+                            </Button>
+                        </Card>
+                    )
+                }
+                {
+                    ['CORRETOR', 'ATENDIMENTO', 'ADMIN'].includes(localStorage.getItem('role')) && (
+                        <Card sx={{ mt: 3, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Valor Condicionado
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                value={formatToBRL(valorCondicionado)}
+                                onChange={(e) => {
+                                    setValorCondicionado(removeMask(e.target.value));
+                                    setValorCondicionadoChanged(true);
+                                }}
+                                variant="outlined"
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{ mt: 2 }}
+                                onClick={handleSaveValorCondicionado}
+                                disabled={!valorCondicionadoChanged}
+                            >
+                                Salvar Valor Condicionado
                             </Button>
                         </Card>
                     )

@@ -31,6 +31,7 @@ import SideMenu from '../components/SideMenu';
 import logo from '../assets/imgs/logo-1.png';
 import PrevisaoFaturamento from './PrevisaoFaturamento';
 import { formatToBRL } from '../utils';
+import RelatorioCorretores from '../components/RelatorioCorretores';
 // --- Componente Principal ---
 export default function Dashboard() {
     // Função genérica para buscar dados
@@ -62,9 +63,14 @@ export default function Dashboard() {
         return fetchData('/pipeline-corretores');
     };
 
+    const fetchRelatorioCorretores = () => {
+        return fetchData('/relatorio-corretores');
+    };
+
     const [kpis, setKpis] = useState({});
     const [ranking, setRanking] = useState([]);
     const [pipeline, setPipeline] = useState([]);
+    const [relatorioCorretores, setRelatorioCorretores] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
@@ -88,13 +94,15 @@ export default function Dashboard() {
                 previsaoFaturamento
             });
 
-            const [rankingData, pipelineData] = await Promise.all([
+            const [rankingData, pipelineData, relatorioCorretores] = await Promise.all([
                 fetchRankingCorretores(),
-                fetchPipelineCorretores()
+                fetchPipelineCorretores(),
+                fetchRelatorioCorretores()
             ]);
 
             setRanking(rankingData || []);
             setPipeline(pipelineData || []);
+            setRelatorioCorretores(relatorioCorretores.data)
             setLoading(false);
         };
 
@@ -273,6 +281,7 @@ export default function Dashboard() {
                             </CardContent>
                         </Card>
                     </Grid>
+                    <RelatorioCorretores dados={relatorioCorretores} />
                 </Grid>
             </Container>
         </Box>

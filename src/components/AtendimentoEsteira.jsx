@@ -46,13 +46,6 @@ const AtendimentoEsteira = () => {
   const [loading, setLoading] = useState(false)
   
   
-  const etapas = {
-    'Simulação': esteira['Simulação'],
-    'Colher documentação': esteira['Colher documentação'],
-    'Abertura de conta': esteira['Abertura de conta'],
-    'Conformidade de conta': esteira['Conformidade de conta'],
-    'Análise de crédito': esteira['Análise de crédito']
-  }
   async function getProcesses() {
     const { data } = await apiBase.post(`/atendimentos/grouped-by-etapa`);
     setEsteira(data)
@@ -70,7 +63,7 @@ const AtendimentoEsteira = () => {
 
     getData()
   }, [])
-  const stages = Object.keys(etapas);
+  const stages = Object.keys(esteira);
   async function avancarEtapa(processoId) {
     try {
       await apiBase.post(`/atendimentos/${processoId}/proxima-etapa`);
