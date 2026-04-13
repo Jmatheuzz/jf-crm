@@ -27,12 +27,12 @@ jobs:
         run: npm run build
 
       - name: Deploy via rsync
-        uses: burnett01/rsync-deployments@7.0.1
+        uses: easingthemes/ssh-deploy@main
         with:
-          switches: -avzr --delete
-          path: dist/
-          remote_path: ${{ secrets.HOSTINGER_FRONTEND_PATH }}
-          remote_host: ${{ secrets.HOSTINGER_HOST }}
-          remote_port: ${{ secrets.HOSTINGER_PORT }}
-          remote_user: ${{ secrets.HOSTINGER_USERNAME }}
-          remote_key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          ARGS: "-avzr --delete"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
+          REMOTE_PORT: ${{ secrets.HOSTINGER_PORT }}
+          REMOTE_USER: ${{ secrets.HOSTINGER_USERNAME }}
+          TARGET: ${{ secrets.HOSTINGER_FRONTEND_PATH }}
