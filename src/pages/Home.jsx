@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { apiBase } from "../network/api"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
@@ -14,7 +14,7 @@ import Button from "@mui/material/Button"
 import { useNavigate } from "react-router-dom";
 import logo from '../assets/imgs/logo-1.png';
 import ProcessoCard from "../components/processo/ProcessoCard"
-import SideMenu from "../components/SideMenu" // Import SideMenu
+import SideMenu from "../components/SideMenu"
 import { TextField } from "@mui/material"
 
 export default function Home() {
@@ -22,32 +22,31 @@ export default function Home() {
     const [processos, setProcessos] = useState([]);
     const [visitas, setVisitas] = useState([]);
     const [tabValue, setTabValue] = useState(0);
-    const [loading, setLoading] = useState(false)
-const [searchTerm, setSearchTerm] = useState("");
-    async function getAtendimentos() {
-        const { data } = await apiBase.get('/atendimentos')
-        setAtendimentos(data)
-    }
-
-    async function getProcessos() {
-        const { data } = await apiBase.get('/processos')
-        setProcessos(data)
-    }
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
 
     const navigate = useNavigate()
 
-    async function getVisitas() {
-        const { data } = await apiBase.get('/visitas')
-        setVisitas(data)
-    }
+    // Debounce: só filtra 300ms após o usuário parar de digitar
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+        return () => clearTimeout(timer)
+    }, [searchTerm])
 
     useEffect(() => {
         async function getData() {
             try {
                 setLoading(true)
-                await getAtendimentos()
-                await getProcessos()
-                await getVisitas()
+                // Dispara os três requests em paralelo em vez de sequencialmente
+                const [atendimentosRes, processosRes, visitasRes] = await Promise.all([
+                    apiBase.get('/atendimentos'),
+                    apiBase.get('/processos'),
+                    apiBase.get('/visitas'),
+                ])
+                setAtendimentos(atendimentosRes.data)
+                setProcessos(processosRes.data)
+                setVisitas(visitasRes.data)
             } finally {
                 setLoading(false)
             }
@@ -56,9 +55,15 @@ const [searchTerm, setSearchTerm] = useState("");
         getData()
     }, [])
 
-      const filteredAtendimentos = atendimentos.filter((atendimento) =>
-    atendimento?.cliente?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    // Filtro memoizado — só recalcula quando os dados ou o termo (debounced) mudam
+    const filteredAtendimentos = useMemo(
+        () => atendimentos.filter((atendimento) =>
+            atendimento?.cliente?.name
+                ?.toLowerCase()
+                .includes(debouncedSearch.toLowerCase())
+        ),
+        [atendimentos, debouncedSearch]
+    );
 
     if (loading) return <Typography>Carregando...</Typography>
 
@@ -117,7 +122,7 @@ const [searchTerm, setSearchTerm] = useState("");
                                         Usuários
                                     </Button>
                     )}
-                    {filteredAtendimentos.length !== 0 && filteredAtendimentos.map((atendimento) => (
+                    {filteredAtendimentos.length !== 0 && filteredAtendimentos.reverse().map((atendimento) => (
                         <AtendimentoCard key={atendimento.id} atendimento={atendimento} />
                     ))}
                     {filteredAtendimentos.length === 0 && (

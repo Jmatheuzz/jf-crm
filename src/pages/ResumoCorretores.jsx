@@ -133,7 +133,7 @@ export default function ResumoCorretores() {
                 {loadingRelatorio ? (
                     <Typography>Carregando relatório...</Typography>
                 ) : relatorio.length > 0 ? (
-                    <RelatorioCorretores dados={relatorio} />
+                    <RelatorioCorretores dados={relatorio} dataInicio={dataInicio} dataFim={dataFim} />
                 ) : (
                     <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
                         Nenhum dado encontrado para o período selecionado.

@@ -134,7 +134,7 @@ export default function AdminProcesso() {
                             ))}
                         </Select>
                     </FormControl>
-                    {filteredProcessos.length !== 0 && filteredProcessos.map((atendimento) => (
+                    {filteredProcessos.reverse().length !== 0 && filteredProcessos.map((atendimento) => (
                         <ProcessoCard key={atendimento.id} processo={atendimento} />
                     ))}
                     {filteredProcessos.length === 0 && (
