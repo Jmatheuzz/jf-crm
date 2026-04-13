@@ -26,13 +26,24 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via rsync
-        uses: easingthemes/ssh-deploy@main
+      - name: Upload dist via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
-          ARGS: "-avzr --delete"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
-          REMOTE_PORT: ${{ secrets.HOSTINGER_PORT }}
-          REMOTE_USER: ${{ secrets.HOSTINGER_USERNAME }}
-          TARGET: ${{ secrets.HOSTINGER_FRONTEND_PATH }}
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          source: "dist/"
+          target: "~/deploy_crm_tmp"
+
+      - name: Mover arquivos para public_html
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script: |
+            rsync -a --delete ~/deploy_crm_tmp/dist/ ${{ secrets.HOSTINGER_FRONTEND_PATH }}/
+            rm -rf ~/deploy_crm_tmp
+            echo "Deploy concluido com sucesso!"
