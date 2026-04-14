@@ -69,20 +69,20 @@ const ComissaoCard = ({ comissao, onUpdateStatus }) => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
                             <Typography variant="body2" color="text.secondary">
-                                Valor do imóvel: {formatToBRL(comissao.processo_habitacional.imovel.valor)}
+                                Valor do imóvel: {formatToBRL(comissao.processo_habitacional?.imovel?.valor)}
                             </Typography>
                         </Box>
                         }
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
                             <Typography variant="body2" color="text.secondary">
-                                Corretor: {comissao.processo_habitacional.corretor.name}
+                                Corretor: {comissao.processo_habitacional.corretor?.name}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <CalendarTodayIcon fontSize="small" color="action" sx={{ mr: 1 }} />
                             <Typography variant="body2" color="text.secondary">
-                                Cliente: {comissao.processo_habitacional.cliente.name}
+                                Cliente: {comissao.processo_habitacional.cliente?.name}
                             </Typography>
                         </Box>
 
